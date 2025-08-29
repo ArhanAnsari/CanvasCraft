@@ -1,26 +1,40 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body,
+#_next {
+  height: 100%
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui;
+  background: linear-gradient(180deg, #071023 0%, #071023 40%, #061428 100%);
+  color: #e6eef8
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.canvas-area {
+  min-height: 60vh;
+  border-radius: 14px;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.00));
+}
+
+.cursor-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
