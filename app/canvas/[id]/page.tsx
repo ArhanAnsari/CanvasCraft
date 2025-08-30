@@ -10,6 +10,9 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-ki
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { v4 as uuidv4 } from "uuid";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export default function CanvasEditor({ params }:{ params:{ id:string } }){
   const id = params.id;
   const [canvas, setCanvas] = useState<any>(null);
