@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import { databases, storage, realtime } from "@/lib/appwrite";
-import Toolbar from "@/components/CanvasEditor/Toolbar";
+import { Toolbar } from "@/components/CanvasEditor/Toolbar";
 import BlockItem from "@/components/CanvasEditor/BlockItem";
 import Cursors from "@/components/CanvasEditor/Cursors";
 import { Templates, Block } from "@/components/CanvasEditor/templates";
