@@ -1,16 +1,79 @@
-'use client';
-import { useEffect, useState } from "react";
-import { account } from "./appwrite";
+"use client";
 
-export function useAuth(){
-  const [user, setUser] = useState<any | null>(null);
+import { createContext, useContext, useEffect, useState } from "react";
+import { account } from "./appwrite";
+import { ID } from "appwrite";
+import getBaseUrl from "./getBaseUrl";
+
+interface User {
+  $id: string;
+  email: string;
+  name?: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  signup: (email: string, password: string, name?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  loginWithGithub: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-    account.get().then(u=>{ setUser(u); setLoading(false); }).catch(()=>{ setUser(null); setLoading(false); });
-  },[]);
+  const fetchUser = async () => {
+    try {
+      const res = await account.get();
+      setUser(res);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const signOut = async ()=>{ try{ await account.deleteSession("current"); setUser(null); } catch(e){ console.error(e); } };
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
-  return { user, loading, signOut, account };
+  const signup = async (email: string, password: string, name?: string) => {
+    await account.create(ID.unique(), email, password, name);
+    await login(email, password); // auto-login
+  };
+
+  const login = async (email: string, password: string) => {
+    await account.createEmailPasswordSession(email, password);
+    await fetchUser();
+  };
+
+  const loginWithGithub = async () => {
+    // redirect-based OAuth login
+    account.createOAuth2Session(
+      "github",
+      `${getBaseUrl()}/dashboard`, // success redirect
+      `${getBaseUrl()}/login`      // failure redirect
+    );
+  };
+
+  const logout = async () => {
+    await account.deleteSession("current");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, signup, login, loginWithGithub, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 }

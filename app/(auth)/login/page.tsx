@@ -1,19 +1,68 @@
-// app/(auth)/login/page.tsx
 "use client";
+
+import { useState } from "react";
 import { useAuth } from "@/lib/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGithub } = useAuth();
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await login(email, password);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold">Login</h1>
-      <button
-        onClick={login}
-        className="bg-blue-500 text-white px-4 py-2 rounded-md"
-      >
-        Login with Appwrite
-      </button>
+    <div className="max-w-md mx-auto mt-20 bg-slate-900 p-6 rounded-2xl shadow-lg">
+      <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 rounded bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 rounded bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-md"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <button
+          onClick={loginWithGithub}
+          className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-md"
+        >
+          Continue with GitHub
+        </button>
+      </div>
     </div>
   );
 }
