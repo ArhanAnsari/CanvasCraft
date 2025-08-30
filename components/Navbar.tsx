@@ -15,7 +15,7 @@ export default function Navbar(){
         <nav className="flex items-center gap-4">
           <Link href="/dashboard" className={`text-sm ${path.startsWith('/dashboard')? 'text-white' : 'text-slate-300'}`}>Dashboard</Link>
           <Link href="/publish" className={`text-sm ${path.startsWith('/publish')? 'text-white' : 'text-slate-300'}`}>Publish</Link>
-          <Link href="/(auth)/login" className="text-sm text-slate-300">Login</Link>
+          <Link href="/login" className="text-sm text-slate-300">Login</Link>
         </nav>
       </div>
     </motion.header>

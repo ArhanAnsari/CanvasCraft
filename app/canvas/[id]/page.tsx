@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
-import { databases, storage, realtime } from "@/lib/appwrite";
+import { databases, storage } from "@/lib/appwrite";
 import { Toolbar } from "@/components/CanvasEditor/Toolbar";
 import BlockItem from "@/components/CanvasEditor/BlockItem";
 import Cursors from "@/components/CanvasEditor/Cursors";
@@ -17,14 +17,22 @@ export default function CanvasEditor({ params }:{ params:{ id:string } }){
 
   useEffect(()=>{ if(!id) return; (async ()=>{ try{ const doc = await databases.getDocument(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID||"", process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID||"", id); setCanvas(doc); }catch(e){ console.error(e); } })(); },[id]);
 
-  // subscribe realtime for canvas updates
+  // subscribe realtime for canvas updates (dynamically import realtime if available)
   useEffect(()=>{
     if(!id) return;
-    const channel = `databases.${process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID}.documents.${id}`;
-    const unsubscribe = realtime.subscribe([channel], res=>{
-      if(res.events?.includes("databases.*.documents.*.update")) setCanvas(prev=> ({...prev, ...res.payload}));
-    });
-    return ()=>{ try{ unsubscribe(); }catch{} };
+    let unsubscribe: any;
+    (async ()=>{
+      try{
+        const mod = await import('@/lib/appwrite');
+        const realtime = (mod as any).realtime;
+        if(!realtime) return;
+        const channel = `databases.${process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID}.documents.${id}`;
+        unsubscribe = realtime.subscribe([channel], (res:any)=>{
+          if(res.events?.includes("databases.*.documents.*.update")) setCanvas((prev:any)=> ({...prev, ...res.payload}));
+        });
+      }catch(e){ console.error(e); }
+    })();
+    return ()=>{ try{ if(unsubscribe) unsubscribe(); }catch{} };
   },[id]);
 
   // presence polling (simple)
@@ -33,6 +41,7 @@ export default function CanvasEditor({ params }:{ params:{ id:string } }){
   const persist = async (patch:any)=>{ if(!canvas) return; try{ const updated = await databases.updateDocument(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID||"", process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID||"", canvas.$id, patch); setCanvas(updated); }catch(e){ console.error(e); } };
 
   const add = async (t:keyof typeof Templates)=>{ const block = Templates[t](); const blocks = [...(canvas?.blocks||[]), block]; setCanvas({...canvas, blocks}); await persist({ blocks }); };
+  
   const addImage = async (file:File)=>{ if(!file) return; try{ const up = await storage.createFile(process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID||"", 'unique()', file); const url = `${(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT||'').replace('/v1','')}/storage/buckets/${up.bucketId}/files/${up.$id}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`; const block:Block = { id: uuidv4(), type:'image', props:{ url } }; const blocks = [...(canvas?.blocks||[]), block]; setCanvas({...canvas, blocks}); await persist({ blocks }); }catch(e){ console.error(e); } };
 
   const onUpdateBlock = async (b:Block)=>{ const blocks = (canvas.blocks||[]).map((x:Block)=> x.id === b.id ? b : x); setCanvas({...canvas, blocks}); await persist({ blocks }); };
