@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
-import { databases, storage } from "@/lib/appwrite";
+import { databases, storage, Query } from "@/lib/appwrite";
 import { Toolbar } from "@/components/CanvasEditor/Toolbar";
 import BlockItem from "@/components/CanvasEditor/BlockItem";
 import Cursors from "@/components/CanvasEditor/Cursors";
@@ -78,7 +78,7 @@ export default function CanvasEditor({ params }: { params: { id: string } }) {
       }
     })();
     return () => {
-      try { if (unsubscribe) unsubscribe(); } catch {}
+      try { if (unsubscribe) unsubscribe(); } catch { }
     };
   }, [id]);
 
@@ -90,10 +90,10 @@ export default function CanvasEditor({ params }: { params: { id: string } }) {
         const list = await databases.listDocuments(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "",
           process.env.NEXT_PUBLIC_APPWRITE_PRESENCE_COLLECTION_ID || "",
-          [`equal("canvasId","${id}")`]
+          [Query.equal("canvasId", id)]
         );
         setPresence(list.documents || []);
-      } catch (e) {}
+      } catch (e) { }
     }, 4000);
     return () => clearInterval(i);
   }, [id]);

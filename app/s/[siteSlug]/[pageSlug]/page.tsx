@@ -1,4 +1,4 @@
-import { databases } from "@/lib/appwrite";
+import { databases, Query } from "@/lib/appwrite";
 import BlockRenderer from "@/components/CanvasEditor/BlockRenderer";
 import { Block } from "@/components/CanvasEditor/templates";
 
@@ -9,9 +9,9 @@ export default async function PublishedPage({ params }: { params: { siteSlug: st
   const coll = process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!;
 
   const res = await databases.listDocuments(db, coll, [
-    `equal("siteSlug", "${params.siteSlug}")`,
-    `equal("pageSlug", "${params.pageSlug}")`,
-  ]);
+      Query.equal("siteSlug", params.siteSlug),
+      Query.equal("pageSlug", params.pageSlug),
+]);
 
   const doc = res.documents[0];
 
