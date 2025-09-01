@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-right",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cloud.appwrite.io",
+      },
+    ],
+  },
   // Enable React strict mode
   reactStrictMode: true,
 };
