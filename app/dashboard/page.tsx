@@ -11,6 +11,7 @@ interface Canvas {
   title: string;
   published: boolean;
   publishedUrl?: string;
+  blocks?: any[];
 }
 
 export default function Dashboard() {
@@ -30,14 +31,23 @@ export default function Dashboard() {
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!
       );
-      // map Appwrite documents to our Canvas interface
+
       const docs = res.documents || [];
       const mapped = (docs as any[]).map((d) => ({
         $id: d.$id,
         title: d.title ?? `Untitled ${d.$createdAt ?? Date.now()}`,
         published: Boolean(d.published),
         publishedUrl: d.publishedUrl || undefined,
+        // 🔑 Parse blocks safely
+        blocks: (d.blocks || []).map((b: string) => {
+          try {
+            return JSON.parse(b);
+          } catch {
+            return null;
+          }
+        }).filter(Boolean),
       })) as Canvas[];
+
       setCanvases(mapped);
     } catch (e) {
       console.error("Failed to fetch canvases:", e);
@@ -56,7 +66,8 @@ export default function Dashboard() {
         ID.unique(),
         {
           title: `Untitled ${Date.now()}`,
-          blocks: [] as string[],
+          // 🔑 Store as stringified JSON
+          blocks: [],
           published: false,
           publishedUrl: "",
         }
