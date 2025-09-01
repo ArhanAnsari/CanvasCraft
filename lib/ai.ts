@@ -4,7 +4,7 @@ import { generateText } from 'ai';
 
 export async function suggestBlocks(prompt: string){
   const res = await generateText({
-    model: google('models/gemini-1.5-flash-latest'),
+    model: google('gemini-2.0-flash'),
     prompt: `You are a site section generator. Output STRICT JSON with an array named blocks. Blocks can be hero, features, gallery, cta, footer. Example hero fields: heading, subheading, buttonLabel, buttonHref. Keep to 3-5 blocks. User prompt: ${prompt}`
   });
   try{
@@ -24,7 +24,7 @@ export async function suggestBlocks(prompt: string){
 
 export async function suggestWithAI(prompt: string) {
     const { text } = await generateText({
-        model: google('models/gemini-1.5-flash-latest'),
+        model: google('gemini-2.0-flash'),
         prompt: `You are a helpful assistant that provides concise suggestions. User prompt: ${prompt}`
     });
     return text;
