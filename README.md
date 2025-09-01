@@ -1,87 +1,66 @@
-🌐 Appwrite Sites Hackathon Project
+# CanvasCraft
 
-Welcome to my Appwrite Sites Hackathon Project! 🚀 This project was built as part of the Appwrite Hackathon to showcase creativity, technical skills, and the power of Appwrite in modern web development.
+A creative portfolio project built for the Appwrite Sites Hackathon — a modern, responsive web app demonstrating Appwrite-powered authentication, data, and storage integrations.
 
-✨ Features
+## Key Features
+- Appwrite-powered backend: authentication, databases, and storage
+- Responsive, modern UI with smooth interactions
+- Secure authentication flows using Appwrite Auth
+- Real-time or dynamic data handling via Appwrite Databases
+- Easy deployment to Appwrite, Vercel, or Netlify
 
-⚡ Appwrite-powered backend for authentication, databases, and APIs.
+## Tech Stack
+- Frontend: HTML, CSS, JavaScript (modern patterns)
+- Backend: Appwrite (Cloud)
+- Deployment: Appwrite
+- Tools: GitHub, VS Code, Framer Motion (for animations) and Appwrite
 
-🎨 Modern UI built with sleek, responsive design.
+## Getting Started
 
-🔒 Secure Authentication using Appwrite Auth.
+Clone the repository and install dependencies:
 
-📊 Dynamic Data Handling with Appwrite Databases.
-
-🌍 Deployed seamlessly for global access.
-
-🛠️ Tech Stack
-
-Frontend: HTML, CSS, JavaScript (with modern UI principles)
-
-Backend: Appwrite
-
-Deployment: Appwrite + Vercel / Netlify
-
-Other Tools: GitHub, VS Code, Framer Motion (if animations added)
-
-🚀 Getting Started
-
-Follow these steps to run the project locally:
-
-1️⃣ Clone the repository
-
+```bash
 git clone https://github.com/ArhanAnsari/CanvasCraft.git
 cd CanvasCraft
-
-2️⃣ Install dependencies
-
 npm install
+```
 
-3️⃣ Set up Appwrite
+Create an Appwrite project and add credentials to a `.env` file in the repo root:
 
-Create a project in Appwrite Cloud.
-
-Configure authentication, database, and storage.
-
-Add your Appwrite project credentials in .env file:
-
-NEXT_PUBLIC_APPWRITE_ENDPOINT = "https://fra.cloud.appwrite.io/v1"
+```env
+NEXT_PUBLIC_APPWRITE_ENDPOINT="https://fra.cloud.appwrite.io/v1"
 NEXT_PUBLIC_PROJECT_ID=your_project_id
 NEXT_PUBLIC_DATABASE_ID=your_database_id
+```
 
-4️⃣ Run the project
+Run locally:
 
+```bash
 npm run dev
+# Open: http://localhost:3000
+```
 
-Then open https://localhost:3000 🎉
+## Deployment
+- Build and deploy to Vercel or Netlify with the same environment variables.
+- For Appwrite-hosted deployments, follow Appwrite Sites documentation to connect your app.
 
-📸 Screenshots
+## Screenshots
+(Place project screenshots in `/docs` or `./screenshots` and reference them here for a visual preview.)
 
-(Will Add my project screenshots here for a visual preview!)
+## Learnings
+- Implemented Appwrite Auth flows and secure session handling
+- Designed database schemas and client-side database interactions
+- Improved UI/UX with responsive layout and subtle animations
 
-📚 Learnings
+## Acknowledgements
+Thanks to Appwrite for the backend platform, the hackathon organizers, and the open-source community for inspiration.
 
-Mastered Appwrite Authentication and Database usage.
+## Contact
+Arhan Ansari  
+Portfolio: https://arhanansari.vercel.app  
+GitHub: https://github.com/ArhanAnsari  
+Twitter: https://twitter.com/codewitharhan
 
-Explored seamless integration of backend services.
+---
 
-Improved skills in building sleek, responsive UIs.
-
-🙌 Acknowledgements
-
-Appwrite for providing an amazing backend platform.
-
-Hackathon organizers for the opportunity.
-
-Open source community for inspiration.
-
-📬 Contact
-
-👤 Arhan Ansari🔗 Portfolio: arhan-ansari.vercel.app🐙 GitHub: @ArhanAnsari🐦 Twitter: @codewitharhan
-
-⭐ Support
-
-If you like this project, please give it a ⭐ on GitHub — it really helps!
-
-⚡ Built with ❤️ for the Appwrite Hackathon 2025
-
+If this project helped you, a ⭐ on GitHub is appreciated!
