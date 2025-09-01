@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Databases, Storage, Client, ID } from "appwrite";
+import slugify from "slugify";
+import getBaseUrl from "@/lib/getBaseUrl";
 
 const client = new Client()
   .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "")
@@ -62,16 +64,15 @@ export async function POST(req: Request) {
 
     const up = await storage.createFile(bucket, fileId, file);
 
-    const url = `${(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "").replace(
-      "/v1",
-      ""
-    )}/storage/buckets/${up.bucketId}/files/${up.$id}/view?project=${
-      process.env.NEXT_PUBLIC_APPWRITE_PROJECT
+    const url = `${getBaseUrl()}/s/${doc.siteSlug || slugify(doc.title || "site", { lower: true })}/${
+      doc.pageSlug || "index"
     }`;
 
     await databases.updateDocument(db, coll, id, {
       publishedUrl: url,
       published: true,
+      siteSlug: doc.siteSlug || slugify(doc.title || "site", { lower: true }),
+      pageSlug: doc.pageSlug || "index",
     });
 
     return NextResponse.json({ url });

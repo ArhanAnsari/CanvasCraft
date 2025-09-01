@@ -24,7 +24,7 @@ export default async function PublishedPage({ params }: { params: { siteSlug: st
       <h1 className="text-3xl font-bold mb-6">{doc.title}</h1>
       <div className="space-y-4">
         {(doc.blocks || []).map((block: Block) => (
-          <BlockRenderer key={block.id} block={block} onUpdate={() => {}} />
+          <BlockRenderer key={block.id} block={block} onUpdate={(b: Block) => {}} />
         ))}
       </div>
     </div>
