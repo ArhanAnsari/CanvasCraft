@@ -10,6 +10,7 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-ki
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { v4 as uuidv4 } from "uuid";
 import { use } from "react";
+import { usePresence } from "@/hooks/usePresence";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -17,8 +18,8 @@ export const fetchCache = "force-no-store";
 export default function CanvasEditor({ params }: { params: { id: string } }) {
   const id = params.id;
   const [canvas, setCanvas] = useState<any>(null);
-  const [presence, setPresence] = useState<any[]>([]);
-
+  const { people: presence, updateCursor } = usePresence(id);
+  
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -201,7 +202,10 @@ export default function CanvasEditor({ params }: { params: { id: string } }) {
   if (!canvas) return <div className="mt-8">Loading...</div>;
 
   return (
-    <div className="relative mt-8">
+      <div
+      className="relative mt-8"
+      onMouseMove={(e) => updateCursor({ x: e.clientX, y: e.clientY })}
+      >
       <Cursors presence={presence} />
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-3">
