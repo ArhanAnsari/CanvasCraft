@@ -1,4 +1,5 @@
 import { account } from "./appwrite";
+import { redirect } from "next/navigation";
 
 export async function signUp(email: string, password: string, name: string) {
   return await account.create("unique()", email, password, name);
@@ -17,5 +18,7 @@ export async function getCurrentUser() {
 }
 
 export async function logout() {
-  return await account.deleteSession("current");
+  return await account.deleteSession("current") .then(() => {
+    redirect("/login");
+  });
 }

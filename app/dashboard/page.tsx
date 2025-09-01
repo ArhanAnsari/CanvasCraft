@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { databases, ID } from "@/lib/appwrite";
+import { databases, ID, account } from "@/lib/appwrite";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -19,11 +19,23 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 🔄 Load canvases
+  // 🔐 Check authentication then load canvases
   useEffect(() => {
-    fetchCanvases();
-  }, []);
+    const checkAuthAndLoad = async () => {
+      try {
+        // using Appwrite SDK to verify session; throws if no session
+        await account.get();
+        fetchCanvases();
+      } catch (err) {
+        // not authenticated -> redirect to /login
+        router.replace("/login");
+      }
+    };
 
+    checkAuthAndLoad();
+  }, [router]);
+
+  // 🔄 Load canvases
   const fetchCanvases = async () => {
     try {
       setLoading(true);

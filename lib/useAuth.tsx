@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { account } from "./appwrite";
 import { ID } from "appwrite";
 import getBaseUrl from "./getBaseUrl";
+import { redirect } from "next/navigation";
 
 interface User {
   $id: string;
@@ -63,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await account.deleteSession("current");
     setUser(null);
+    redirect("/login");
   };
 
   return (
