@@ -1,19 +1,21 @@
-'use client';
-
 import { databases, Query } from "@/lib/appwrite";
-import ReadOnlyBlockRenderer from "@/components/CanvasEditor/ReadOnlyBlockRenderer";
+import BlockRenderer from "@/components/CanvasEditor/BlockRenderer";
 import { Block } from "@/components/CanvasEditor/templates";
 
 export const dynamic = "force-dynamic";
 
-export default async function PublishedPage({ params }: { params: { siteSlug: string, pageSlug: string } }) {
+export default async function PublishedPage({
+  params,
+}: {
+  params: { siteSlug: string; pageSlug: string };
+}) {
   const db = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
   const coll = process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!;
 
   const res = await databases.listDocuments(db, coll, [
-      Query.equal("siteSlug", params.siteSlug),
-      Query.equal("pageSlug", params.pageSlug),
-]);
+    Query.equal("siteSlug", params.siteSlug),
+    Query.equal("pageSlug", params.pageSlug),
+  ]);
 
   const doc = res.documents[0];
 
@@ -26,7 +28,7 @@ export default async function PublishedPage({ params }: { params: { siteSlug: st
       <h1 className="text-3xl font-bold mb-6">{doc.title}</h1>
       <div className="space-y-4">
         {(doc.blocks || []).map((block: Block) => (
-          <ReadOnlyBlockRenderer key={block.id} block={block} />
+          <BlockRenderer key={block.id} block={block} editable={false} />
         ))}
       </div>
     </div>
