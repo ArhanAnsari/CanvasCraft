@@ -1,3 +1,5 @@
+'use client';
+
 import { databases, Query } from "@/lib/appwrite";
 import ReadOnlyBlockRenderer from "@/components/CanvasEditor/ReadOnlyBlockRenderer";
 import { Block } from "@/components/CanvasEditor/templates";
