@@ -8,7 +8,7 @@ export default function BlockRenderer({
   editable = true,
 }: {
   block: Block;
-  onUpdate: (b: Block) => void;
+  onUpdate?: (b: Block) => void; // now optional
   editable?: boolean;
 }) {
   if (block.type === "hero") {
@@ -25,7 +25,7 @@ export default function BlockRenderer({
               className="w-full text-3xl font-extrabold mb-2 bg-transparent outline-none"
               defaultValue={p.heading}
               onBlur={(e) =>
-                onUpdate({
+                onUpdate?.({
                   ...block,
                   props: { ...p, heading: e.currentTarget.value },
                 })
@@ -35,7 +35,7 @@ export default function BlockRenderer({
               className="w-full text-slate-300 bg-transparent outline-none"
               defaultValue={p.subheading}
               onBlur={(e) =>
-                onUpdate({
+                onUpdate?.({
                   ...block,
                   props: { ...p, subheading: e.currentTarget.value },
                 })
@@ -46,7 +46,7 @@ export default function BlockRenderer({
                 className="px-2 py-1 rounded bg-slate-800"
                 defaultValue={p.buttonLabel}
                 onBlur={(e) =>
-                  onUpdate({
+                  onUpdate?.({
                     ...block,
                     props: { ...p, buttonLabel: e.currentTarget.value },
                   })
@@ -56,7 +56,7 @@ export default function BlockRenderer({
                 className="px-2 py-1 rounded bg-slate-800"
                 defaultValue={p.buttonHref}
                 onBlur={(e) =>
-                  onUpdate({
+                  onUpdate?.({
                     ...block,
                     props: { ...p, buttonHref: e.currentTarget.value },
                   })
@@ -92,7 +92,7 @@ export default function BlockRenderer({
               className="text-2xl font-bold mb-3 w-full bg-transparent outline-none"
               defaultValue={p.title}
               onBlur={(e) =>
-                onUpdate({
+                onUpdate?.({
                   ...block,
                   props: { ...p, title: e.currentTarget.value },
                 })
@@ -107,7 +107,7 @@ export default function BlockRenderer({
                     onBlur={(e) => {
                       const items = [...p.items];
                       items[i] = { ...it, title: e.currentTarget.value };
-                      onUpdate({ ...block, props: { ...p, items } });
+                      onUpdate?.({ ...block, props: { ...p, items } });
                     }}
                   />
                   <textarea
@@ -116,7 +116,7 @@ export default function BlockRenderer({
                     onBlur={(e) => {
                       const items = [...p.items];
                       items[i] = { ...it, desc: e.currentTarget.value };
-                      onUpdate({ ...block, props: { ...p, items } });
+                      onUpdate?.({ ...block, props: { ...p, items } });
                     }}
                   />
                 </div>
@@ -150,7 +150,7 @@ export default function BlockRenderer({
               className="text-2xl font-bold mb-3 w-full bg-transparent outline-none"
               defaultValue={p.title}
               onBlur={(e) =>
-                onUpdate({
+                onUpdate?.({
                   ...block,
                   props: { ...p, title: e.currentTarget.value },
                 })
@@ -185,7 +185,7 @@ export default function BlockRenderer({
             className="text-xl font-bold bg-transparent text-center outline-none"
             defaultValue={p.text}
             onBlur={(e) =>
-              onUpdate({
+              onUpdate?.({
                 ...block,
                 props: { ...p, text: e.currentTarget.value },
               })
@@ -207,7 +207,7 @@ export default function BlockRenderer({
             className="w-full text-center bg-transparent outline-none"
             defaultValue={p.text}
             onBlur={(e) =>
-              onUpdate({
+              onUpdate?.({
                 ...block,
                 props: { ...p, text: e.currentTarget.value },
               })
@@ -228,7 +228,7 @@ export default function BlockRenderer({
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) =>
-              onUpdate({
+              onUpdate?.({
                 ...block,
                 props: { text: e.currentTarget.textContent },
               })
@@ -256,5 +256,5 @@ export default function BlockRenderer({
     );
   }
 
-  return null;
+  return null;     
 }
