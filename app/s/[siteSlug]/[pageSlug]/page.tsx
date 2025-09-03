@@ -1,6 +1,6 @@
 import { databases, Query } from "@/lib/appwrite";
-import BlockRenderer from "@/components/CanvasEditor/BlockRenderer";
 import { Block } from "@/components/CanvasEditor/templates";
+import ReadOnlyBlockRenderer from "@/components/CanvasEditor/ReadOnlyBlockRenderer";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export default async function PublishedPage({
       <h1 className="text-3xl font-bold mb-6">{doc.title}</h1>
       <div className="space-y-4">
         {(doc.blocks || []).map((block: Block) => (
-          <BlockRenderer key={block.id} block={block} editable={false} />
+          <ReadOnlyBlockRenderer key={block.id} block={block} />
         ))}
       </div>
     </div>

@@ -1,5 +1,4 @@
 'use client';
-
 import { motion } from "framer-motion";
 
 type ToolbarProps = {
@@ -14,22 +13,25 @@ export function Toolbar({ onAdd, onAddImage, onAI }: ToolbarProps) {
     if (file) onAddImage(file);
   };
 
+  const btn =
+    "px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white shadow transition";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass p-4 rounded"
+      className="glass p-4 rounded space-y-2"
     >
       <h4 className="font-semibold mb-3">Add Blocks</h4>
       <div className="flex flex-col gap-2">
-        <button className="btn" onClick={() => onAdd("hero")}>Hero</button>
-        <button className="btn" onClick={() => onAdd("features")}>Features</button>
-        <button className="btn" onClick={() => onAdd("gallery")}>Gallery</button>
-        <button className="btn" onClick={() => onAdd("cta")}>CTA</button>
-        <button className="btn" onClick={() => onAdd("footer")}>Footer</button>
-        <button className="btn" onClick={() => onAdd("text")}>Text</button>
+        <button className={btn} onClick={() => onAdd("hero")}>Hero</button>
+        <button className={btn} onClick={() => onAdd("features")}>Features</button>
+        <button className={btn} onClick={() => onAdd("gallery")}>Gallery</button>
+        <button className={btn} onClick={() => onAdd("cta")}>CTA</button>
+        <button className={btn} onClick={() => onAdd("footer")}>Footer</button>
+        <button className={btn} onClick={() => onAdd("text")}>Text</button>
 
-        <label className="btn cursor-pointer">
+        <label className={`${btn} cursor-pointer`}>
           Upload Image
           <input
             type="file"
@@ -39,8 +41,11 @@ export function Toolbar({ onAdd, onAddImage, onAI }: ToolbarProps) {
           />
         </label>
 
-        <button className="btn btn-primary" onClick={onAI}>
+        <button className={`${btn} bg-gradient-to-r from-indigo-600 to-purple-600`}>
           Generate with AI
+          <span className="ml-2 text-xs bg-yellow-500 text-black px-2 py-0.5 rounded">
+            Coming Soon
+          </span>
         </button>
       </div>
     </motion.div>
