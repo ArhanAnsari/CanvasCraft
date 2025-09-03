@@ -1,54 +1,70 @@
 'use client';
-import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { Templates } from "./templates";
 
-type ToolbarProps = {
-  onAdd: (t: "text" | "hero" | "features" | "gallery" | "cta" | "footer") => Promise<void>;
-  onAddImage: (file: File) => Promise<void>;
-  onAI: () => Promise<void>;
-};
+export function Toolbar({
+  onAdd,
+  onAddImage,
+  onAI,
+}: {
+  onAdd: (t: keyof typeof Templates) => void;
+  onAddImage: (file: File) => void;
+  onAI: () => void;
+}) {
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
-export function Toolbar({ onAdd, onAddImage, onAI }: ToolbarProps) {
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onAddImage(file);
+  const handleFile = (file: File) => {
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    onAddImage(file);
   };
 
-  const btn =
-    "px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white shadow transition";
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass p-4 rounded space-y-2"
-    >
-      <h4 className="font-semibold mb-3">Add Blocks</h4>
-      <div className="flex flex-col gap-2">
-        <button className={btn} onClick={() => onAdd("hero")}>Hero</button>
-        <button className={btn} onClick={() => onAdd("features")}>Features</button>
-        <button className={btn} onClick={() => onAdd("gallery")}>Gallery</button>
-        <button className={btn} onClick={() => onAdd("cta")}>CTA</button>
-        <button className={btn} onClick={() => onAdd("footer")}>Footer</button>
-        <button className={btn} onClick={() => onAdd("text")}>Text</button>
-
-        <label className={`${btn} cursor-pointer`}>
-          Upload Image
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageUpload}
-          />
-        </label>
-
-        <button className={`${btn} bg-gradient-to-r from-indigo-600 to-purple-600`}>
-          Generate with AI
-          <span className="ml-2 text-xs bg-yellow-500 text-black px-2 py-0.5 rounded">
-            Coming Soon
-          </span>
-        </button>
+    <div className="glass p-4 rounded space-y-3">
+      <h4 className="font-semibold mb-2">Add Blocks</h4>
+      <div className="grid grid-cols-2 gap-2">
+        {Object.keys(Templates).map((t) => (
+          <button
+            key={t}
+            onClick={() => onAdd(t as keyof typeof Templates)}
+            className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            {t}
+          </button>
+        ))}
       </div>
-    </motion.div>
+
+      <div className="mt-4">
+        <h4 className="font-semibold mb-2">Upload Image</h4>
+        <div
+          onClick={() => fileInput.current?.click()}
+          className="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center cursor-pointer hover:bg-slate-800/50"
+        >
+          {preview ? (
+            <img src={preview} alt="preview" className="mx-auto rounded max-h-32" />
+          ) : (
+            <span className="text-slate-400">Click or Drop an image</span>
+          )}
+        </div>
+        <input
+          type="file"
+          ref={fileInput}
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+          }}
+        />
+      </div>
+
+      <button
+        onClick={onAI}
+        className="w-full mt-4 px-3 py-2 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-lg text-white font-medium shadow hover:opacity-90"
+      >
+        Generate with AI <span className="ml-1 text-xs text-slate-200">(Coming soon)</span>
+      </button>
+    </div>
   );
 }
-export default Toolbar;

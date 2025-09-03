@@ -14,12 +14,14 @@ export default function Navbar() {
       <div className="flex gap-4 items-center">
         {!user ? (
           <>
+            <Link href="/publish" className="text-slate-300 hover:text-white">Published Sites</Link>
             <Link href="/login" className="text-slate-300 hover:text-white">Login</Link>
             <Link href="/signup" className="px-3 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Signup</Link>
           </>
         ) : (
           <>
             <Link href="/dashboard" className="text-slate-300 hover:text-white">Dashboard</Link>
+            <Link href="/publish" className="text-slate-300 hover:text-white">Published Sites</Link>
             <button
               onClick={logout}
               className="px-3 py-1 rounded-md bg-red-500 hover:bg-red-400 text-white"

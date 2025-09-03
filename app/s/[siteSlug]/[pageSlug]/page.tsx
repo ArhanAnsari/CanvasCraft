@@ -23,11 +23,20 @@ export default async function PublishedPage({
     return <div className="mt-12 text-center">404 – Not Published</div>;
   }
 
+  // ✅ parse JSON strings back to Block objects
+  const blocks: Block[] = (doc.blocks || []).map((b: any) => {
+    try {
+      return typeof b === "string" ? JSON.parse(b) : b;
+    } catch {
+      return null;
+    }
+  }).filter(Boolean);
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{doc.title}</h1>
       <div className="space-y-4">
-        {(doc.blocks || []).map((block: Block) => (
+        {blocks.map((block: Block) => (
           <ReadOnlyBlockRenderer key={block.id} block={block} />
         ))}
       </div>
