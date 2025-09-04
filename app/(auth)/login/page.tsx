@@ -1,21 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, loginWithGithub } = useAuth();
+  const { user, login, loginWithGithub, loading } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+
+  // 🚨 Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setFormLoading(true);
     setError(null);
     try {
       await login(email, password);
@@ -23,9 +30,14 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
+
+  // While checking auth → show loading
+  if (loading || user) {
+    return <div className="text-center text-slate-300 mt-20">Loading...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto mt-20 bg-slate-900 p-6 rounded-2xl shadow-lg">
@@ -45,8 +57,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full p-3 rounded bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        
-        {/* ✅ Forgot Password Link */}
+
         <div className="text-right mb-4">
           <a
             href="/recover"
@@ -55,14 +66,14 @@ export default function LoginPage() {
             Forgot password?
           </a>
         </div>
-        
+
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={formLoading}
           className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-md"
         >
-          {loading ? "Logging in..." : "Login"}
+          {formLoading ? "Logging in..." : "Login"}
         </button>
       </form>
 
