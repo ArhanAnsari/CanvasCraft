@@ -113,7 +113,7 @@ export default function SettingsPage() {
       <div className="space-y-3">
         <button
           onClick={() =>
-            account.createRecovery(user.email, window.location.origin + "/reset-password")
+            account.createRecovery(user.email, window.location.origin + "/recovery")
           }
           className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white"
         >
