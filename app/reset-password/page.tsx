@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { account } from "@/lib/appwrite";
 
 export default function ResetPasswordPage() {
   const params = useSearchParams();
@@ -14,12 +13,9 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // grab values from query string
   useEffect(() => {
-    const u = params.get("userId");
-    const s = params.get("secret");
-    setUserId(u);
-    setSecret(s);
+    setUserId(params.get("userId"));
+    setSecret(params.get("secret"));
   }, [params]);
 
   const resetPassword = async () => {
@@ -27,10 +23,12 @@ export default function ResetPasswordPage() {
       alert("Invalid or missing recovery link.");
       return;
     }
+
     if (password.length < 8) {
       alert("Password must be at least 8 characters long.");
       return;
     }
+
     if (password !== confirm) {
       alert("Passwords do not match.");
       return;
@@ -38,12 +36,21 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      await account.updateRecovery(userId, secret, password, confirm);
+      const res = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, secret, password, confirm }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Reset failed");
+
       alert("✅ Password reset successful! Please log in.");
       router.push("/login");
     } catch (err: any) {
       console.error(err);
-      alert("❌ Failed to reset password. The link may have expired.");
+      alert(err.message || "❌ Failed to reset password.");
     } finally {
       setLoading(false);
     }
