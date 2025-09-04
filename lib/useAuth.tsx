@@ -10,6 +10,9 @@ interface User {
   $id: string;
   email: string;
   name?: string;
+  prefs?: {
+    avatar?: string;
+  };
 }
 
 interface AuthContextType {
