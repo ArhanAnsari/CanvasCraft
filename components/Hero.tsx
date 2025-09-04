@@ -87,7 +87,9 @@ export default function Hero() {
       </div>
 
       {/* Features Section */}
-      <Features />
+      <div id="features">
+        <Features />
+      </div>
     </>
   );
 }
