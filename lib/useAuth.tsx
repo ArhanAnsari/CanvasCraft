@@ -56,11 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginWithGithub = async () => {
-    // redirect-based OAuth login
     account.createOAuth2Session(
       "github",
-      `${getBaseUrl()}/dashboard`, // success redirect
-      `${getBaseUrl()}/login`      // failure redirect
+      `${getBaseUrl()}/dashboard`, // success
+      `${getBaseUrl()}/login`      // failure
     );
   };
 
