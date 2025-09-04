@@ -22,10 +22,10 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 items-center text-sm">
-          <Link href="#how" className="text-slate-300 hover:text-white transition">
+          <Link href="/#how" className="text-slate-300 hover:text-white transition">
             How it works
           </Link>
-          <Link href="#features" className="text-slate-300 hover:text-white transition">
+          <Link href="/#features" className="text-slate-300 hover:text-white transition">
             Features
           </Link>
           <Link href="/publish" className="text-slate-300 hover:text-white transition">
@@ -78,8 +78,8 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden border-t border-slate-700 bg-slate-900/95">
           <div className="flex flex-col p-4 gap-3 text-slate-300">
-            <Link href="#how" onClick={() => setOpen(false)}>How it works</Link>
-            <Link href="#features" onClick={() => setOpen(false)}>Features</Link>
+            <Link href="/#how" onClick={() => setOpen(false)}>How it works</Link>
+            <Link href="/#features" onClick={() => setOpen(false)}>Features</Link>
             <Link href="/publish" onClick={() => setOpen(false)}>Published Sites</Link>
             {!user ? (
               <>
