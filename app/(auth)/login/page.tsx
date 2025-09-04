@@ -1,17 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, loginWithGithub } = useAuth();
+  const { user, login, loginWithGithub, loading } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 🚨 Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +33,11 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // While checking auth → show loading
+  if (loading || user) {
+    return <div className="text-center text-slate-300 mt-20">Loading...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto mt-20 bg-slate-900 p-6 rounded-2xl shadow-lg">
