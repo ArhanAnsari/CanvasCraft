@@ -54,11 +54,11 @@ export default function Features() {
             className="flex flex-col md:flex-row items-center gap-6"
           >
             {/* Illustration */}
-            <div className="flex-shrink-0 w-40 h-28 bg-slate-800/40 rounded-xl border border-slate-700 flex items-center justify-center overflow-hidden">
+            <div className="flex-shrink-0 max-w-[200px] rounded-xl border border-slate-700 bg-slate-800/40 flex items-center justify-center overflow-hidden">
               <img
                 src={f.illustration}
                 alt={f.title}
-                className="object-contain w-full h-full p-4"
+                className="object-contain w-full h-auto"
               />
             </div>
 

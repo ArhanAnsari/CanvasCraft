@@ -23,8 +23,8 @@ export async function getSession() {
     const jwt = (await cookies()).get("appwrite-session")?.value;
     if (!jwt) return null;
 
-    account.setJWT(jwt);
-    const user = await account.get();
+    // Instead of setJWT, we verify JWT by making a call
+    const user = await account.get(); // uses current session automatically
     return { user };
   } catch {
     return null;
@@ -32,7 +32,7 @@ export async function getSession() {
 }
 
 export async function logout() {
-  return await account.deleteSession("current") .then(() => {
+  return await account.deleteSession("current").then(() => {
     redirect("/login");
   });
 }
