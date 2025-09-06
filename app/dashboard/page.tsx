@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/useAuth";
+import { Pencil, Trash2, Share2, Globe, GlobeLock } from "lucide-react";
 
 interface Canvas {
   $id: string;
@@ -22,7 +23,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [me, setMe] = useState<any>(null);
-  const { user } = useAuth(); // logged-in user
+  const { user } = useAuth();
 
   useEffect(() => {
     const checkAuthAndLoad = async () => {
@@ -75,31 +76,31 @@ export default function Dashboard() {
   };
 
   // ➕ Create new canvas
-const createCanvas = async () => {
-  try {
-    const user = await account.get(); // get current logged in user
+  const createCanvas = async () => {
+    try {
+      const user = await account.get();
 
-    const doc = await databases.createDocument(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-      process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
-      ID.unique(),
-      {
-        title: `Untitled ${Date.now()}`,
-        blocks: [], // 🔑 Store as stringified JSON
-        published: false,
-        publishedUrl: "",
-        ownerId: user.$id, // ✅ required
-        userId: user.$id, // ✅ required
-      }
-    );
+      const doc = await databases.createDocument(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+        ID.unique(),
+        {
+          title: `Untitled ${Date.now()}`,
+          blocks: [],
+          published: false,
+          publishedUrl: "",
+          ownerId: user.$id,
+          userId: user.$id,
+        }
+      );
 
-    toast.success("New canvas created!");
-    router.push(`/canvas/${doc.$id}`);
-  } catch (e) {
-    console.error("Failed to create canvas:", e);
-    toast.error("Failed to create canvas");
-  }
-};
+      toast.success("New canvas created!");
+      router.push(`/canvas/${doc.$id}`);
+    } catch (e) {
+      console.error("Failed to create canvas:", e);
+      toast.error("Failed to create canvas");
+    }
+  };
 
   // 🗑️ Delete canvas
   const deleteCanvas = async (id: string) => {
@@ -119,7 +120,7 @@ const createCanvas = async () => {
     }
   };
 
-  // 🌍 Publish site (calls /api/publish)
+  // 🌍 Publish site
   const publishSite = async (id: string) => {
     try {
       toast.loading("Publishing site...");
@@ -132,9 +133,7 @@ const createCanvas = async () => {
       if (res.ok) {
         setCanvases((prev) =>
           prev.map((c) =>
-            c.$id === id
-              ? { ...c, published: true, publishedUrl: data.url }
-              : c
+            c.$id === id ? { ...c, published: true, publishedUrl: data.url } : c
           )
         );
         toast.success("Site published!");
@@ -147,6 +146,41 @@ const createCanvas = async () => {
     } finally {
       toast.dismiss();
     }
+  };
+
+  // 🚫 Unpublish site
+  const unpublishSite = async (id: string) => {
+    try {
+      toast.loading("Unpublishing site...");
+      await databases.updateDocument(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+        id,
+        {
+          published: false,
+          publishedUrl: "",
+        }
+      );
+
+      setCanvases((prev) =>
+        prev.map((c) =>
+          c.$id === id ? { ...c, published: false, publishedUrl: "" } : c
+        )
+      );
+      toast.success("Site unpublished!");
+    } catch (e) {
+      console.error("Failed to unpublish:", e);
+      toast.error("Unpublish failed");
+    } finally {
+      toast.dismiss();
+    }
+  };
+
+  // 📤 Share canvas
+  const shareCanvas = (id: string) => {
+    const url = `${window.location.origin}/canvas/${id}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Canvas link copied!");
   };
 
   return (
@@ -170,25 +204,70 @@ const createCanvas = async () => {
           {canvases.map((c) => (
             <div
               key={c.$id}
-              className="glass p-5 rounded-2xl shadow-md flex flex-col justify-between"
+              className="relative bg-slate-800/40 backdrop-blur-md border border-slate-700 p-5 rounded-2xl shadow-lg flex flex-col justify-between 
+              transform transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
             >
+              {/* 🔹 Action Icons */}
+              <div className="absolute top-3 right-3 flex gap-2">
+                <button
+                  onClick={() => router.push(`/canvas/${c.$id}`)}
+                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                  title="Edit"
+                >
+                  <Pencil size={16} className="text-slate-300" />
+                </button>
+                <button
+                  onClick={() => shareCanvas(c.$id)}
+                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                  title="Share"
+                >
+                  <Share2 size={16} className="text-slate-300" />
+                </button>
+                <button
+                  onClick={() => deleteCanvas(c.$id)}
+                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                  title="Delete"
+                >
+                  <Trash2 size={16} className="text-red-400" />
+                </button>
+
+                {/* Publish + Unpublish shown together */}
+                <button
+                  onClick={() => publishSite(c.$id)}
+                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                  title="Publish"
+                >
+                  <Globe size={16} className="text-green-400" />
+                </button>
+                <button
+                  onClick={() => unpublishSite(c.$id)}
+                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                  title="Unpublish"
+                >
+                  <GlobeLock size={16} className="text-yellow-400" />
+                </button>
+              </div>
+
+              {/* 🔹 Card Content */}
               <div>
                 <Link
                   href={`/canvas/${c.$id}`}
-                  className="text-lg font-semibold hover:underline"
+                  className="text-lg font-semibold hover:underline text-slate-100"
                 >
                   {c.title}
                 </Link>
-                <div
-                  className={`mt-1 inline-block px-2 py-0.5 text-xs rounded-full ${
+
+                <span
+                  className={`ml-3 inline-block px-3 py-1 text-xs rounded-full ${
                     c.published
                       ? "bg-green-600/20 text-green-400"
                       : "bg-slate-600/20 text-slate-400"
                   }`}
                 >
                   {c.published ? "Published" : "Draft"}
-                </div>
-                <div className="mt-3 text-sm text-slate-400">
+                </span>
+
+                <div className="mt-2 text-sm text-slate-400">
                   {c.userId === me?.$id ? "👑 Owner" : "👥 Shared"}
                 </div>
               </div>
@@ -205,27 +284,6 @@ const createCanvas = async () => {
                 ) : (
                   <span className="text-slate-500 text-sm">Not Published</span>
                 )}
-              </div>
-
-              <div className="mt-4 flex justify-between text-sm">
-                <button
-                  onClick={() =>
-                    c.published ? toast.info("Unpublish coming soon") : publishSite(c.$id)
-                  }
-                  className={`px-3 py-1 rounded-lg ${
-                    c.published
-                      ? "bg-yellow-700 hover:bg-yellow-800 text-yellow-200"
-                      : "bg-green-700 hover:bg-green-800 text-green-200"
-                  }`}
-                >
-                  {c.published ? "Unpublish" : "Publish"}
-                </button>
-                <button
-                  onClick={() => deleteCanvas(c.$id)}
-                  className="px-3 py-1 bg-red-700 hover:bg-red-800 text-red-200 rounded-lg"
-                >
-                  Delete
-                </button>
               </div>
             </div>
           ))}

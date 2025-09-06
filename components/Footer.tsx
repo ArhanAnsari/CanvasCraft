@@ -3,7 +3,7 @@ import { Github, Twitter, Globe } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="border-t border-slate-800 bg-slate-900/80 backdrop-blur mt-20">
-      <div className="container py-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+      <div className="container mx-auto py-10 px-6 md:px-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         {/* Brand */}
         <div>
           <h3 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
