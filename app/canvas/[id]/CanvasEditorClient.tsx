@@ -16,6 +16,7 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { v4 as uuidv4 } from "uuid";
 import { usePresence } from "@/hooks/usePresence";
 import { ID } from "appwrite";
+import CanvasSettings from "@/components/CanvasEditor/CanvasSettings"; // ✅ updated import
 
 export default function CanvasEditorClient({ id }: { id: string }) {
   const [canvas, setCanvas] = useState<any>(null);
@@ -177,22 +178,6 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     }
   };
 
-  const publish = async () => {
-    try {
-      const res = await fetch("/api/publish", {
-        method: "POST",
-        body: JSON.stringify({ id: canvas.$id, userId: canvas.userId }),
-      });
-      const json = await res.json();
-      if (json.url) {
-        await persist({ published: true, publishedUrl: json.url });
-        alert(`Published at: ${json.url}`);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   if (!canvas) return <div className="mt-8">Loading...</div>;
 
   return (
@@ -201,21 +186,16 @@ export default function CanvasEditorClient({ id }: { id: string }) {
       onMouseMove={(e) => updateCursor({ x: e.clientX, y: e.clientY })}
     >
       <Cursors presence={presence} />
+
       <div className="grid grid-cols-12 gap-6">
+        {/* Left sidebar */}
         <div className="col-span-12 md:col-span-3">
           <Toolbar onAdd={add} onAddImage={addImage} onAI={aiSuggest} />
         </div>
+
+        {/* Middle editor */}
         <div className="col-span-12 md:col-span-6">
           <div className="glass p-4 rounded">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                Editing: <strong>{canvas.title}</strong>
-              </div>
-              <div className="text-sm text-slate-300">
-                Presence: {presence.length}
-              </div>
-            </div>
-
             <DndContext
               onDragEnd={onDragEnd}
               collisionDetection={closestCenter}
@@ -239,33 +219,13 @@ export default function CanvasEditorClient({ id }: { id: string }) {
           </div>
         </div>
 
+        {/* Right sidebar (Canvas Settings) */}
         <div className="col-span-12 md:col-span-3">
-          <div className="glass p-4 rounded">
-            <h4 className="font-semibold mb-2">Canvas Settings</h4>
-            <label className="block mb-2 text-sm">
-              Title
-              <input
-                defaultValue={canvas.title}
-                onBlur={(e) => persist({ title: e.currentTarget.value })}
-                className="w-full mt-1 p-2 rounded bg-slate-900 border"
-              />
-            </label>
-            <button
-              className="mt-3 btn btn-primary w-full"
-              onClick={publish}
-            >
-              Publish
-            </button>
-            {canvas.published && canvas.publishedUrl && (
-              <a
-                href={canvas.publishedUrl}
-                target="_blank"
-                className="mt-2 block text-cyan-300 text-sm"
-              >
-                View Live Site
-              </a>
-            )}
-          </div>
+          <CanvasSettings
+            canvasId={canvas.$id}
+            initialTitle={canvas.title}
+            presenceCount={presence.length}
+          />
         </div>
       </div>
     </div>
