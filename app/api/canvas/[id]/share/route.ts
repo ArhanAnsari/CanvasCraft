@@ -1,25 +1,34 @@
 import { NextResponse } from "next/server";
 import { databases } from "@/lib/appwrite";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+interface RouteProps {
+  params: Promise<{ id: string }>;
+}
+
+export async function POST(req: Request, { params }: RouteProps) {
+  const { id } = await params; // ✅ canvasId
   const { email, role } = await req.json();
 
   try {
-    // Store invite record in DB (you can later send email notifications here)
+    // Create presence record for invited user
     await databases.createDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-      process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+      process.env.NEXT_PUBLIC_APPWRITE_PRESENCE_COLLECTION_ID!, // ✅ Use presence collection
       "unique()",
       {
-        canvasId: params.id,
-        email,
-        role,
-        status: "pending",
+        canvasId: id, // ✅ relation to canvases
+        inviteEmail: email, // ✅ store invite email
+        role: role || "viewer", // default role
+        status: "invited",
       }
     );
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to invite user" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Invite Error:", error);
+    return NextResponse.json(
+      { error: "Failed to invite user" },
+      { status: 500 }
+    );
   }
 }
