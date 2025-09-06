@@ -5,7 +5,8 @@ import getBaseUrl from "@/lib/getBaseUrl";
 
 const client = new Client()
   .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "")
-  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT || "");
+  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT || "")
+  .setDevKey(process.env.APPWRITE_API_KEY || "");
 
 const databases = new Databases(client);
 const storage = new Storage(client);

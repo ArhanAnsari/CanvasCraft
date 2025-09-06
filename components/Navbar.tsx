@@ -8,6 +8,7 @@ import { useState } from "react";
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   const getInitials = (name?: string, email?: string) => {
     if (name) return name.split(" ").map((n) => n[0]).join("").toUpperCase();
@@ -25,9 +26,8 @@ export default function Navbar() {
           CanvasCraft
         </Link>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 items-center text-sm">
-          <Link href="/#how" className="text-slate-300 hover:text-white transition">How it works</Link>
+          <Link href="/#how-it-works" className="text-slate-300 hover:text-white transition">How it works</Link>
           <Link href="/#features" className="text-slate-300 hover:text-white transition">Features</Link>
           <Link href="/publish" className="text-slate-300 hover:text-white transition">Published Sites</Link>
 
@@ -43,32 +43,23 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/dashboard" className="text-slate-300 hover:text-white transition">Dashboard</Link>
-
-              {/* Avatar Dropdown */}
-              <div className="relative group">
-                {user.prefs?.avatar ? (
-                  <img
-                    src={user.prefs.avatar}
-                    alt="User Avatar"
-                    className="w-8 h-8 rounded-full border border-slate-600 cursor-pointer"
-                  />
-                ) : (
-                  <div className="w-8 h-8 flex items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-bold cursor-pointer">
-                    {getInitials(user.name, user.email)}
+              <Link href="/dashboard" className="text-slate-300">Dashboard</Link>
+              <div className="relative">
+                <button onClick={() => setAvatarOpen(!avatarOpen)}>
+                  {user.prefs?.avatar ? (
+                    <img src={user.prefs.avatar} alt="avatar" className="w-8 h-8 rounded-full border" />
+                  ) : (
+                    <div className="w-8 h-8 flex items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-bold">
+                      {getInitials(user.name, user.email)}
+                    </div>
+                  )}
+                </button>
+                {avatarOpen && (
+                  <div className="absolute right-0 mt-2 flex flex-col bg-slate-800 border border-slate-700 rounded-lg shadow-lg w-40 text-sm">
+                    <Link href="/settings" className="px-4 py-2 hover:bg-slate-700">⚙️ Settings</Link>
+                    <button onClick={logout} className="px-4 py-2 text-red-400 hover:bg-slate-700">Logout</button>
                   </div>
                 )}
-
-                {/* Dropdown */}
-                <div className="absolute right-0 mt-2 hidden group-hover:flex flex-col bg-slate-800 border border-slate-700 rounded-lg shadow-lg w-40 text-sm">
-                  <Link href="/settings" className="px-4 py-2 text-slate-300 hover:bg-slate-700 rounded-t-lg">⚙️ Settings</Link>
-                  <button
-                    onClick={logout}
-                    className="px-4 py-2 text-left text-red-400 hover:bg-slate-700 rounded-b-lg"
-                  >
-                    Logout
-                  </button>
-                </div>
               </div>
             </>
           )}

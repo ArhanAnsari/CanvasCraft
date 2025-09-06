@@ -45,7 +45,7 @@ export default function Hero() {
               Get started →
             </Link>
             <a
-              href="#how"
+              href="#how-it-works"
               className="px-6 py-3 rounded-xl text-lg border border-slate-700/60 hover:border-slate-500 transition text-slate-300 hover:text-white"
             >
               How it works
@@ -82,7 +82,7 @@ export default function Hero() {
       </section>
 
       {/* How it works Section with id */}
-      <div id="how">
+      <div id="how-it-works">
         <HowItWorks />
       </div>
 

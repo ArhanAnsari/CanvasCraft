@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container py-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         {/* Brand */}
         <div>
-          <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
+          <h3 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
             CanvasCraft
           </h3>
           <p className="mt-3 text-slate-400 text-sm leading-relaxed">
@@ -19,7 +19,7 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-slate-200">Quick Links</h4>
           <ul className="mt-3 space-y-2 text-slate-400 text-sm">
-            <li><a href="/#how" className="hover:text-white transition">How it works</a></li>
+            <li><a href="/#how-it-works" className="hover:text-white transition">How it works</a></li>
             <li><a href="/#features" className="hover:text-white transition">Features</a></li>
             <li><a href="/dashboard" className="hover:text-white transition">Dashboard</a></li>
             <li><a href="/publish" className="hover:text-white transition">Published Sites</a></li>

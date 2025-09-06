@@ -5,6 +5,7 @@ import { databases, ID, account } from "@/lib/appwrite";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/useAuth";
 
 interface Canvas {
   $id: string;
@@ -12,31 +13,31 @@ interface Canvas {
   published: boolean;
   publishedUrl?: string;
   blocks?: any[];
+  userId: string;
+  sharedWith?: string[];
 }
 
 export default function Dashboard() {
   const [canvases, setCanvases] = useState<Canvas[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [me, setMe] = useState<any>(null);
+  const { user } = useAuth(); // logged-in user
 
-  // 🔐 Check authentication then load canvases
   useEffect(() => {
     const checkAuthAndLoad = async () => {
       try {
-        // using Appwrite SDK to verify session; throws if no session
-        await account.get();
-        fetchCanvases();
-      } catch (err) {
-        // not authenticated -> redirect to /login
+        const user = await account.get();
+        setMe(user);
+        fetchCanvases(user.$id);
+      } catch {
         router.replace("/login");
       }
     };
-
     checkAuthAndLoad();
   }, [router]);
 
-  // 🔄 Load canvases
-  const fetchCanvases = async () => {
+  const fetchCanvases = async (uid: string) => {
     try {
       setLoading(true);
       const res = await databases.listDocuments(
@@ -45,21 +46,25 @@ export default function Dashboard() {
       );
 
       const docs = res.documents || [];
-      const mapped = (docs as any[]).map((d) => ({
-        $id: d.$id,
-        title: d.title ?? `Untitled ${d.$createdAt ?? Date.now()}`,
-        published: Boolean(d.published),
-        publishedUrl: d.publishedUrl || undefined,
-        // 🔑 Parse blocks safely
-        blocks: (d.blocks || []).map((b: string) => {
-          try {
-            return JSON.parse(b);
-          } catch {
-            return null;
-          }
-        }).filter(Boolean),
-      })) as Canvas[];
-
+      const mapped = (docs as any[])
+        .filter((d) => d.userId === uid || (d.sharedWith || []).includes(uid))
+        .map((d) => ({
+          $id: d.$id,
+          title: d.title ?? `Untitled ${d.$createdAt ?? Date.now()}`,
+          published: Boolean(d.published),
+          publishedUrl: d.publishedUrl || undefined,
+          userId: d.userId,
+          sharedWith: d.sharedWith || [],
+          blocks: (d.blocks || [])
+            .map((b: string) => {
+              try {
+                return JSON.parse(b);
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean),
+        })) as Canvas[];
       setCanvases(mapped);
     } catch (e) {
       console.error("Failed to fetch canvases:", e);
@@ -70,27 +75,31 @@ export default function Dashboard() {
   };
 
   // ➕ Create new canvas
-  const createCanvas = async () => {
-    try {
-      const doc = await databases.createDocument(
-        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-        process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
-        ID.unique(),
-        {
-          title: `Untitled ${Date.now()}`,
-          // 🔑 Store as stringified JSON
-          blocks: [],
-          published: false,
-          publishedUrl: "",
-        }
-      );
-      toast.success("New canvas created!");
-      router.push(`/canvas/${doc.$id}`);
-    } catch (e) {
-      console.error("Failed to create canvas:", e);
-      toast.error("Failed to create canvas");
-    }
-  };
+const createCanvas = async () => {
+  try {
+    const user = await account.get(); // get current logged in user
+
+    const doc = await databases.createDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+      ID.unique(),
+      {
+        title: `Untitled ${Date.now()}`,
+        blocks: [], // 🔑 Store as stringified JSON
+        published: false,
+        publishedUrl: "",
+        ownerId: user.$id, // ✅ required
+        userId: user.$id, // ✅ required
+      }
+    );
+
+    toast.success("New canvas created!");
+    router.push(`/canvas/${doc.$id}`);
+  } catch (e) {
+    console.error("Failed to create canvas:", e);
+    toast.error("Failed to create canvas");
+  }
+};
 
   // 🗑️ Delete canvas
   const deleteCanvas = async (id: string) => {
@@ -178,6 +187,9 @@ export default function Dashboard() {
                   }`}
                 >
                   {c.published ? "Published" : "Draft"}
+                </div>
+                <div className="mt-3 text-sm text-slate-400">
+                  {c.userId === me?.$id ? "👑 Owner" : "👥 Shared"}
                 </div>
               </div>
 

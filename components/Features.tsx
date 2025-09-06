@@ -5,7 +5,7 @@ import { Code2, Sparkles, Users, Globe } from "lucide-react";
 
 const features = [
   {
-    title: "Drag & Drop Builder",
+    title: "No-code editor",
     description: "Quickly assemble pages with pre-made blocks, no coding required.",
     icon: <Code2 className="w-8 h-8 text-indigo-400" />,
     illustration: "/images/dragdrop.png",

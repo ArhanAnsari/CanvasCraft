@@ -1,31 +1,21 @@
-import { google } from '@ai-sdk/google';
-import { generateText } from 'ai';
-// export const gemini = google({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY! });
+import { google } from "@ai-sdk/google";
+import { generateText } from "ai";
 
-export async function suggestBlocks(prompt: string){
+export async function suggestBlocks(prompt: string) {
   const res = await generateText({
-    model: google('gemini-2.0-flash'),
-    prompt: `You are a site section generator. Output STRICT JSON with an array named blocks. Blocks can be hero, features, gallery, cta, footer. Example hero fields: heading, subheading, buttonLabel, buttonHref. Keep to 3-5 blocks. User prompt: ${prompt}`
+    model: google("gemini-2.0-flash"),
+    prompt: `Return JSON only with an array "blocks". Blocks: hero, features, gallery, cta, footer. Example hero fields: heading, subheading, buttonLabel, buttonHref. User prompt: ${prompt}`,
   });
-  try{
+
+  try {
     const text = res.text || "";
-    // find first { to try parse
     const jsonStart = text.indexOf("{");
-    if(jsonStart >= 0){
-      const json = JSON.parse(text.slice(jsonStart));
-      return json.blocks || [];
+    if (jsonStart >= 0) {
+      const parsed = JSON.parse(text.slice(jsonStart));
+      return parsed.blocks || [];
     }
     return [];
-  }catch(e){
-    console.error("AI error", e);
+  } catch {
     return [];
   }
-}
-
-export async function suggestWithAI(prompt: string) {
-    const { text } = await generateText({
-        model: google('gemini-2.0-flash'),
-        prompt: `You are a helpful assistant that provides concise suggestions. User prompt: ${prompt}`
-    });
-    return text;
 }

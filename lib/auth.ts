@@ -17,6 +17,19 @@ export async function getCurrentUser() {
   }
 }
 
+export async function getSession() {
+  try {
+    const jwt = cookies().get("appwrite-session")?.value;
+    if (!jwt) return null;
+
+    account.setJWT(jwt);
+    const user = await account.get();
+    return { user };
+  } catch {
+    return null;
+  }
+}
+
 export async function logout() {
   return await account.deleteSession("current") .then(() => {
     redirect("/login");
