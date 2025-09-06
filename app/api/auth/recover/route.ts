@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { account } from "@/lib/appwrite"; // your Appwrite client instance
+import getBaseUrl from "@/lib/getBaseUrl";
 
 // POST /api/auth/recover
 export async function POST(req: Request) {
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     // Appwrite requires a redirect URL (where the user lands after clicking the reset link)
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`;
+    const resetUrl = `${getBaseUrl()}/reset-password`;
 
     await account.createRecovery(email, resetUrl);
 

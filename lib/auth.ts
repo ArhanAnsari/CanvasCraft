@@ -1,5 +1,6 @@
 import { account } from "./appwrite";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export async function signUp(email: string, password: string, name: string) {
   return await account.create("unique()", email, password, name);
@@ -19,7 +20,7 @@ export async function getCurrentUser() {
 
 export async function getSession() {
   try {
-    const jwt = cookies().get("appwrite-session")?.value;
+    const jwt = (await cookies()).get("appwrite-session")?.value;
     if (!jwt) return null;
 
     account.setJWT(jwt);
