@@ -1,260 +1,189 @@
-'use client';
-import { motion } from "framer-motion";
+// components/CanvasEditor/BlockRenderer.tsx
+"use client";
+
+import React, { useRef, useEffect, useState } from "react";
 import type { Block } from "./templates";
 
-export default function BlockRenderer({
-  block,
-  onUpdate,
-  editable = true,
+/**
+ * Lightweight contentEditable wrapper:
+ * - supports basic formatting via execCommand for bold/italic/underline
+ * - on blur it saves the HTML/text to block props
+ */
+function RichEditable({
+  html,
+  onChange,
+  placeholder,
+  className = "",
 }: {
-  block: Block;
-  onUpdate?: (b: Block) => void; // now optional
-  editable?: boolean;
+  html?: string;
+  onChange: (html: string) => void;
+  placeholder?: string;
+  className?: string;
 }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (ref.current && html !== ref.current.innerHTML) {
+      ref.current.innerHTML = html || "";
+    }
+  }, [html]);
+
+  const save = () => {
+    if (!ref.current) return;
+    onChange(ref.current.innerHTML || "");
+  };
+
+  return (
+    <div>
+      <div className={`prose prose-invert max-w-full ${className}`}>
+        <div
+          ref={ref}
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={save}
+          className="min-h-[36px] outline-none"
+          data-placeholder={placeholder}
+        />
+      </div>
+      <div className="mt-2 flex gap-2">
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); document.execCommand("bold"); }} className="px-2 py-1 bg-slate-800 rounded">B</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); document.execCommand("italic"); }} className="px-2 py-1 bg-slate-800 rounded">I</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); document.execCommand("underline"); }} className="px-2 py-1 bg-slate-800 rounded">U</button>
+      </div>
+    </div>
+  );
+}
+
+export default function BlockRenderer({ block, onUpdate }: { block: Block; onUpdate: (b: Block) => void; }) {
+  const updateProps = (patch: any) => onUpdate({ ...block, props: { ...block.props, ...patch } });
+
+  // Style controls (bg color + font size)
+  const StyleControls = () => {
+    const [bg, setBg] = useState(block.props.bg || "");
+    const [fs, setFs] = useState(block.props.fontSize || "");
+    useEffect(() => { setBg(block.props.bg || ""); setFs(block.props.fontSize || ""); }, [block.props]);
+    return (
+      <div className="mb-3 flex items-center gap-2">
+        <input
+          type="color"
+          value={bg || "#0b1220"}
+          onChange={(e) => { setBg(e.target.value); updateProps({ bg: e.target.value }); }}
+          title="Background color"
+          className="w-10 h-8 p-0 rounded"
+        />
+        <select value={fs || "base"} onChange={(e) => { setFs(e.target.value); updateProps({ fontSize: e.target.value }); }} className="bg-slate-800 text-sm rounded px-2 py-1">
+          <option value="sm">Small</option>
+          <option value="base">Base</option>
+          <option value="lg">Large</option>
+          <option value="xl">XL</option>
+        </select>
+      </div>
+    );
+  };
+
+  const appliedStyle = {
+    background: block.props.bg || "transparent",
+    fontSize:
+      block.props.fontSize === "sm" ? "14px" :
+      block.props.fontSize === "lg" ? "18px" :
+      block.props.fontSize === "xl" ? "22px" : "16px",
+    padding: block.props.bg ? "14px" : undefined,
+    borderRadius: block.props.bg ? "8px" : undefined,
+  } as React.CSSProperties;
+
   if (block.type === "hero") {
-    const p = block.props;
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="rounded p-6 bg-gradient-to-br from-indigo-900/30 to-cyan-900/20"
-      >
-        {editable ? (
-          <>
-            <input
-              className="w-full text-3xl font-extrabold mb-2 bg-transparent outline-none"
-              defaultValue={p.heading}
-              onBlur={(e) =>
-                onUpdate?.({
-                  ...block,
-                  props: { ...p, heading: e.currentTarget.value },
-                })
-              }
-            />
-            <textarea
-              className="w-full text-slate-300 bg-transparent outline-none"
-              defaultValue={p.subheading}
-              onBlur={(e) =>
-                onUpdate?.({
-                  ...block,
-                  props: { ...p, subheading: e.currentTarget.value },
-                })
-              }
-            />
-            <div className="mt-3 flex gap-2">
-              <input
-                className="px-2 py-1 rounded bg-slate-800"
-                defaultValue={p.buttonLabel}
-                onBlur={(e) =>
-                  onUpdate?.({
-                    ...block,
-                    props: { ...p, buttonLabel: e.currentTarget.value },
-                  })
-                }
-              />
-              <input
-                className="px-2 py-1 rounded bg-slate-800"
-                defaultValue={p.buttonHref}
-                onBlur={(e) =>
-                  onUpdate?.({
-                    ...block,
-                    props: { ...p, buttonHref: e.currentTarget.value },
-                  })
-                }
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl font-extrabold mb-2">{p.heading}</h1>
-            <p className="text-slate-300">{p.subheading}</p>
-            {p.buttonLabel && (
-              <a
-                href={p.buttonHref}
-                className="inline-block mt-3 px-4 py-2 bg-indigo-600 text-white rounded"
-              >
-                {p.buttonLabel}
-              </a>
-            )}
-          </>
-        )}
-      </motion.div>
-    );
-  }
-
-  if (block.type === "features") {
-    const p = block.props;
-    return (
-      <div className="glass p-6 rounded">
-        {editable ? (
-          <>
-            <input
-              className="text-2xl font-bold mb-3 w-full bg-transparent outline-none"
-              defaultValue={p.title}
-              onBlur={(e) =>
-                onUpdate?.({
-                  ...block,
-                  props: { ...p, title: e.currentTarget.value },
-                })
-              }
-            />
-            <div className="grid md:grid-cols-3 gap-4">
-              {p.items.map((it: any, i: number) => (
-                <div key={i} className="p-3 bg-slate-900 rounded">
-                  <input
-                    className="font-semibold w-full bg-transparent outline-none"
-                    defaultValue={it.title}
-                    onBlur={(e) => {
-                      const items = [...p.items];
-                      items[i] = { ...it, title: e.currentTarget.value };
-                      onUpdate?.({ ...block, props: { ...p, items } });
-                    }}
-                  />
-                  <textarea
-                    className="text-sm w-full bg-transparent outline-none"
-                    defaultValue={it.desc}
-                    onBlur={(e) => {
-                      const items = [...p.items];
-                      items[i] = { ...it, desc: e.currentTarget.value };
-                      onUpdate?.({ ...block, props: { ...p, items } });
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold mb-3">{p.title}</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {p.items.map((it: any, i: number) => (
-                <div key={i} className="p-3 bg-slate-900 rounded">
-                  <h3 className="font-semibold">{it.title}</h3>
-                  <p className="text-sm">{it.desc}</p>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  if (block.type === "gallery") {
-    const p = block.props;
-    return (
-      <div className="glass p-6 rounded">
-        {editable ? (
-          <>
-            <input
-              className="text-2xl font-bold mb-3 w-full bg-transparent outline-none"
-              defaultValue={p.title}
-              onBlur={(e) =>
-                onUpdate?.({
-                  ...block,
-                  props: { ...p, title: e.currentTarget.value },
-                })
-              }
-            />
-            <div className="grid grid-cols-3 gap-2">
-              {(p.images || []).map((url: string, i: number) => (
-                <img key={i} src={url} className="rounded" />
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold mb-3">{p.title}</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {(p.images || []).map((url: string, i: number) => (
-                <img key={i} src={url} className="rounded" />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  if (block.type === "cta") {
-    const p = block.props;
-    return (
-      <div className="rounded p-6 text-center bg-gradient-to-r from-indigo-600/30 to-cyan-500/20">
-        {editable ? (
-          <input
-            className="text-xl font-bold bg-transparent text-center outline-none"
-            defaultValue={p.text}
-            onBlur={(e) =>
-              onUpdate?.({
-                ...block,
-                props: { ...p, text: e.currentTarget.value },
-              })
-            }
+      <div style={appliedStyle}>
+        <StyleControls />
+        <RichEditable
+          html={block.props.heading || ""}
+          onChange={(html) => updateProps({ heading: html })}
+          placeholder="Hero heading..."
+          className="text-2xl font-bold text-white"
+        />
+        <div className="mt-3">
+          <RichEditable
+            html={block.props.subheading || ""}
+            onChange={(html) => updateProps({ subheading: html })}
+            placeholder="Subheading..."
+            className="text-slate-300"
           />
-        ) : (
-          <p className="text-xl font-bold">{p.text}</p>
-        )}
-      </div>
-    );
-  }
-
-  if (block.type === "footer") {
-    const p = block.props;
-    return (
-      <div className="text-center opacity-80">
-        {editable ? (
-          <input
-            className="w-full text-center bg-transparent outline-none"
-            defaultValue={p.text}
-            onBlur={(e) =>
-              onUpdate?.({
-                ...block,
-                props: { ...p, text: e.currentTarget.value },
-              })
-            }
-          />
-        ) : (
-          <p>{p.text}</p>
-        )}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <input className="bg-slate-800 px-3 py-1 rounded" value={block.props.buttonLabel || ""} onChange={(e) => updateProps({ buttonLabel: e.target.value })} placeholder="Button label" />
+          <input className="bg-slate-800 px-3 py-1 rounded flex-1" value={block.props.buttonHref || ""} onChange={(e) => updateProps({ buttonHref: e.target.value })} placeholder="Button href" />
+        </div>
       </div>
     );
   }
 
   if (block.type === "text") {
     return (
-      <div className="p-3 bg-slate-900 rounded">
-        {editable ? (
-          <div
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) =>
-              onUpdate?.({
-                ...block,
-                props: { text: e.currentTarget.textContent },
-              })
-            }
-            className="min-h-[40px]"
-          >
-            {block.props.text}
-          </div>
-        ) : (
-          <p>{block.props.text}</p>
-        )}
+      <div style={appliedStyle}>
+        <StyleControls />
+        <textarea className="w-full bg-transparent border border-slate-700 rounded p-2 text-slate-100" value={block.props.text || ""} onChange={(e) => updateProps({ text: e.target.value })} />
       </div>
     );
   }
 
   if (block.type === "image") {
-    return <img src={block.props.url} className="rounded" />;
-  }
-
-  if (block.type === "button") {
     return (
-      <a href={block.props.href} className="btn btn-primary">
-        {block.props.label}
-      </a>
+      <div style={appliedStyle}>
+        <StyleControls />
+        <img src={block.props.url} alt="image block" className="w-full object-contain rounded" />
+        <input className="mt-2 w-full bg-slate-800 px-2 py-1 rounded" value={block.props.caption || ""} onChange={(e) => updateProps({ caption: e.target.value })} placeholder="Caption (optional)" />
+      </div>
     );
   }
 
-  return null;     
+  if (block.type === "features") {
+    const items: any[] = block.props.items || [];
+    const updateItem = (idx: number, patch: any) => {
+      const next = items.map((it, i) => (i === idx ? { ...it, ...patch } : it));
+      updateProps({ items: next });
+    };
+    const addItem = () => updateProps({ items: [...items, { title: "New", desc: "" }] });
+    const removeItem = (idx: number) => updateProps({ items: items.filter((_, i) => i !== idx) });
+
+    return (
+      <div style={appliedStyle}>
+        <StyleControls />
+        <input className="w-full bg-transparent border-b border-slate-700 pb-2 text-lg font-semibold text-white mb-3" value={block.props.title || ""} onChange={(e) => updateProps({ title: e.target.value })} />
+        <div className="space-y-2">
+          {items.map((it: any, idx: number) => (
+            <div key={idx} className="flex gap-2 items-start">
+              <input className="bg-slate-800 px-2 py-1 rounded w-32" value={it.title} onChange={(e) => updateItem(idx, { title: e.target.value })} />
+              <input className="bg-slate-800 px-2 py-1 rounded flex-1" value={it.desc} onChange={(e) => updateItem(idx, { desc: e.target.value })} />
+              <button onClick={() => removeItem(idx)} className="px-2 py-1 bg-red-600 rounded text-white">Remove</button>
+            </div>
+          ))}
+          <button onClick={addItem} className="px-3 py-1 bg-indigo-600 rounded text-white text-sm">Add feature</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (block.type === "cta") {
+    return (
+      <div style={appliedStyle} className="flex items-center gap-3">
+        <StyleControls />
+        <input className="flex-1 bg-transparent border-b border-slate-700 pb-2 text-white" value={block.props.text || ""} onChange={(e) => updateProps({ text: e.target.value })} />
+        <input className="bg-slate-800 px-2 py-1 rounded" value={block.props.buttonLabel || ""} onChange={(e) => updateProps({ buttonLabel: e.target.value })} />
+      </div>
+    );
+  }
+
+  if (block.type === "footer") {
+    return (
+      <div style={appliedStyle}>
+        <StyleControls />
+        <input className="w-full bg-transparent border-b border-slate-700 pb-2 text-slate-300" value={block.props.text || ""} onChange={(e) => updateProps({ text: e.target.value })} />
+      </div>
+    );
+  }
+
+  // default dump
+  return (
+    <pre className="text-xs text-slate-400">{JSON.stringify(block, null, 2)}</pre>
+  );
 }
