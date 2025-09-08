@@ -30,8 +30,48 @@ Easily **create, edit, collaborate, publish, and share** websites — all from o
 ---
 
 ## 📂 Project Structure
-. ├── app/                     # Next.js App Router │   
-├── dashboard/   # Dashboard page │   ├── canvas/[id]/         # Canvas editor │   ├── api/                 # API routes (publish, share, etc.) │   └── ... ├── components/              # Reusable components │   ├── Navbar.tsx │   ├── Footer.tsx │   └── Editor/              # Block editor components ├── lib/                     # Appwrite client & hooks ├── public/                  # Static assets └── README.md
+.
+├── app/                       # Next.js App Router
+│   ├── api/                   # API routes (save, publish, share, etc.)
+│   ├── canvas/                # Canvas editor
+│   │   └── [id]/              # Editor for specific canvas
+│   │       ├── page.tsx
+│   │       └── CanvasEditorClient.tsx
+│   ├── dashboard/             # User dashboard (list of canvases)
+│   ├── globals.css            # Tailwind base styles
+│   └── layout.tsx             # Root layout
+│
+├── components/                # Reusable UI + editor components
+│   ├── CanvasEditor/          # All canvas editor modules
+│   │   ├── BlockItem.tsx
+│   │   ├── BlockRenderer.tsx
+│   │   ├── CanvasSettings.tsx
+│   │   ├── Cursors.tsx
+│   │   ├── ShareModal.tsx
+│   │   ├── Toolbar.tsx
+│   │   └── templates.ts
+│   ├── ui/                    # ShadCN UI wrappers
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   └── card.tsx
+│   ├── Navbar.tsx
+│   └── Footer.tsx
+│
+├── hooks/                     # Custom React hooks
+│   └── usePresence.ts
+│
+├── lib/                       # Utilities
+│   ├── appwrite.ts            # Appwrite client
+│   └── utils.ts               # Helper functions
+│
+├── public/                    # Static assets (favicons, images)
+│
+├── .env.local.example         # Example env file
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+├── README.md
+└── CONTRIBUTING.md
 
 ## ⚡ Getting Started  
 
