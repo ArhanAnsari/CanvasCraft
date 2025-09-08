@@ -1,7 +1,6 @@
-// app/canvas/[id]/CanvasEditorClient.tsx
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { databases, storage } from "@/lib/appwrite";
 import { Toolbar } from "@/components/CanvasEditor/Toolbar";
 import BlockItem from "@/components/CanvasEditor/BlockItem";
@@ -23,12 +22,13 @@ export default function CanvasEditorClient({ id }: { id: string }) {
   const [canvas, setCanvas] = useState<any | null>(null);
   const { people: presence, updateCursor } = usePresence(id);
 
-  // selected block id (for keyboard delete / visual focus / nav)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
-  // clipboard for copy/paste saved to localStorage key
   const CLIP_KEY = "ccraft:clipboard";
 
-  // Load canvas from Appwrite
+  // Ref for auto-scroll to selected block
+  const blockRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Load canvas
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -57,7 +57,7 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     })();
   }, [id]);
 
-  // Realtime subscribe to updates
+  // Realtime subscribe
   useEffect(() => {
     if (!id) return;
     let unsubscribe: any;
@@ -90,14 +90,10 @@ export default function CanvasEditorClient({ id }: { id: string }) {
         console.error(e);
       }
     })();
-    return () => {
-      try {
-        if (unsubscribe) unsubscribe();
-      } catch {}
-    };
+    return () => unsubscribe && unsubscribe();
   }, [id]);
 
-  // Helper: persist patch to Appwrite (stringify blocks)
+  // Persist helper
   const persist = useCallback(
     async (patch: any) => {
       if (!canvas) return;
@@ -114,7 +110,6 @@ export default function CanvasEditorClient({ id }: { id: string }) {
           canvas.$id,
           payload
         );
-        // optimistic UI update
         setCanvas((c: any) => ({ ...c, ...patch }));
       } catch (e) {
         console.error(e);
@@ -132,7 +127,7 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     setSelectedBlockId(block.id);
   };
 
-  // Add image via storage
+  // Add image
   const addImage = async (file: File) => {
     if (!file) return;
     try {
@@ -152,14 +147,14 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     }
   };
 
-  // Update individual block
+  // Update block
   const onUpdateBlock = async (b: Block) => {
     const blocks = (canvas.blocks || []).map((x: Block) => (x.id === b.id ? b : x));
     setCanvas({ ...canvas, blocks });
     await persist({ blocks });
   };
 
-  // Delete block
+  // Delete
   const onDeleteBlock = async (idToDelete: string) => {
     if (!canvas) return;
     const blocks = (canvas.blocks || []).filter((b: Block) => b.id !== idToDelete);
@@ -168,7 +163,7 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     if (selectedBlockId === idToDelete) setSelectedBlockId(null);
   };
 
-  // Duplicate block
+  // Duplicate
   const duplicateBlock = async (idToDup: string) => {
     if (!canvas) return;
     const block = canvas.blocks.find((b: Block) => b.id === idToDup);
@@ -181,7 +176,7 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     setSelectedBlockId(copy.id);
   };
 
-  // Copy/Paste using localStorage
+  // Copy/Paste
   const copyBlock = (idToCopy: string) => {
     if (!canvas) return;
     const block = canvas.blocks.find((b: Block) => b.id === idToCopy);
@@ -207,27 +202,34 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     }
   };
 
-  // Keyboard nav / delete / copy-paste shortcuts
+  // Auto-scroll to selected
+  useEffect(() => {
+    if (selectedBlockId && blockRefs.current[selectedBlockId]) {
+      blockRefs.current[selectedBlockId]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [selectedBlockId]);
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!selectedBlockId) return;
 
       const activeTag = (document.activeElement?.tagName || "").toLowerCase();
-      // don't intercept while typing in inputs/textareas/contenteditable
       const isTyping =
         activeTag === "input" ||
         activeTag === "textarea" ||
         (document.activeElement && (document.activeElement as HTMLElement).getAttribute("contenteditable") === "true");
       if (isTyping) return;
 
-      // Delete / Backspace to delete selected block
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         onDeleteBlock(selectedBlockId);
         return;
       }
 
-      // Arrow navigation (up/down) to change selection
       if (e.key === "ArrowUp") {
         e.preventDefault();
         const idx = canvas.blocks.findIndex((b: Block) => b.id === selectedBlockId);
@@ -242,21 +244,18 @@ export default function CanvasEditorClient({ id }: { id: string }) {
         return;
       }
 
-      // Copy (Ctrl/Cmd + C)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
         e.preventDefault();
         copyBlock(selectedBlockId);
         return;
       }
 
-      // Paste (Ctrl/Cmd + V)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
         e.preventDefault();
         pasteBlock(selectedBlockId);
         return;
       }
 
-      // Duplicate (Ctrl/Cmd + D)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
         e.preventDefault();
         duplicateBlock(selectedBlockId);
@@ -268,7 +267,6 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     return () => window.removeEventListener("keydown", handler);
   }, [selectedBlockId, canvas]);
 
-  // Reorder on drag end
   const onDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over) return;
@@ -281,7 +279,6 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     }
   };
 
-  // AI suggest integration
   const aiSuggest = async () => {
     try {
       const res = await fetch("/api/ai/suggest", {
@@ -300,7 +297,6 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     }
   };
 
-  // Publish
   const publish = async () => {
     try {
       const res = await fetch("/api/publish", {
@@ -333,37 +329,39 @@ export default function CanvasEditorClient({ id }: { id: string }) {
 
         <div className="col-span-12 md:col-span-6">
           <div className="glass p-4 rounded">
+            {selectedBlockId && (
+              <div className="mb-3 p-2 bg-slate-700 rounded text-slate-200 text-sm flex justify-between items-center">
+                <span>
+                  ✨ Selected Block:{" "}
+                  <strong>
+                    {canvas.blocks.find((b: Block) => b.id === selectedBlockId)?.type}
+                  </strong>
+                </span>
+                <span className="hidden md:inline text-slate-400">
+                  ⌨️ Del: delete | ↑↓: navigate | ⌘+C/V/D: copy/paste/dup
+                </span>
+              </div>
+            )}
+
             <DndContext onDragEnd={onDragEnd} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]}>
               <SortableContext items={canvas.blocks?.map((b: any) => b.id) || []} strategy={verticalListSortingStrategy}>
                 <div className="canvas-area">
                   {(canvas.blocks || []).map((block: any) => (
-                    <BlockItem
+                    <div
                       key={block.id}
-                      block={block}
-                      isSelected={selectedBlockId === block.id}
-                      onSelect={() => setSelectedBlockId(block.id)}
-                      onUpdate={onUpdateBlock}
-                      onDelete={onDeleteBlock}
-                      onDuplicate={() => duplicateBlock(block.id)}
-                      onCopy={() => copyBlock(block.id)}
-                      onPaste={() => pasteBlock(block.id)}
-                      onMoveUp={() => {
-                        const idx = canvas.blocks.findIndex((b: Block) => b.id === block.id);
-                        if (idx > 0) {
-                          const newBlocks = arrayMove(canvas.blocks, idx, idx - 1);
-                          setCanvas({ ...canvas, blocks: newBlocks });
-                          persist({ blocks: newBlocks });
-                        }
-                      }}
-                      onMoveDown={() => {
-                        const idx = canvas.blocks.findIndex((b: Block) => b.id === block.id);
-                        if (idx < canvas.blocks.length - 1) {
-                          const newBlocks = arrayMove(canvas.blocks, idx, idx + 1);
-                          setCanvas({ ...canvas, blocks: newBlocks });
-                          persist({ blocks: newBlocks });
-                        }
-                      }}
-                    />
+                      ref={(el) => (blockRefs.current[block.id] = el)}
+                    >
+                      <BlockItem
+                        block={block}
+                        isSelected={selectedBlockId === block.id}
+                        onSelect={() => setSelectedBlockId(block.id)}
+                        onUpdate={onUpdateBlock}
+                        onDelete={onDeleteBlock}
+                        onDuplicate={() => duplicateBlock(block.id)}
+                        onCopy={() => copyBlock(block.id)}
+                        onPaste={() => pasteBlock(block.id)}
+                      />
+                    </div>
                   ))}
                 </div>
               </SortableContext>
@@ -372,22 +370,23 @@ export default function CanvasEditorClient({ id }: { id: string }) {
         </div>
 
         <div className="col-span-12 md:col-span-3">
-          <CanvasSettings canvasId={canvas.$id} initialTitle={canvas.title} presenceCount={presence.length} />
+          <CanvasSettings
+            canvasId={canvas.$id}
+            initialTitle={canvas.title}
+            presenceCount={presence.length}
+          />
           <div className="mt-4 glass p-4 rounded">
             <h4 className="font-semibold text-slate-200 mb-2">Quick Actions</h4>
-            <div className="flex gap-2">
-              <button className="px-3 py-2 bg-indigo-600 rounded text-white" onClick={() => publish()}>
+            <div className="flex gap-2 flex-wrap">
+              <button className="px-3 py-2 bg-indigo-600 rounded text-white hover:bg-indigo-700" onClick={() => publish()}>
                 Publish
               </button>
               <button
-                className="px-3 py-2 bg-slate-700 rounded text-white"
+                className="px-3 py-2 bg-slate-700 rounded text-white hover:bg-slate-600"
                 onClick={() => {
                   const data = localStorage.getItem(CLIP_KEY);
-                  if (data) {
-                    pasteBlock();
-                  } else {
-                    alert("Clipboard empty");
-                  }
+                  if (data) pasteBlock();
+                  else alert("Clipboard empty");
                 }}
               >
                 Paste (global)
