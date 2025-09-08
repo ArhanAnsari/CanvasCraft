@@ -75,7 +75,6 @@ export default function Dashboard() {
     }
   };
 
-  // ➕ Create new canvas
   const createCanvas = async () => {
     try {
       const user = await account.get();
@@ -102,7 +101,6 @@ export default function Dashboard() {
     }
   };
 
-  // 🗑️ Delete canvas
   const deleteCanvas = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this canvas?")) return;
 
@@ -120,7 +118,6 @@ export default function Dashboard() {
     }
   };
 
-  // 🌍 Publish site
   const publishSite = async (id: string) => {
     try {
       toast.loading("Publishing site...");
@@ -148,7 +145,6 @@ export default function Dashboard() {
     }
   };
 
-  // 🚫 Unpublish site
   const unpublishSite = async (id: string) => {
     try {
       toast.loading("Unpublishing site...");
@@ -176,7 +172,6 @@ export default function Dashboard() {
     }
   };
 
-  // 📤 Share canvas
   const shareCanvas = (id: string) => {
     const url = `${window.location.origin}/canvas/${id}`;
     navigator.clipboard.writeText(url);
@@ -185,10 +180,10 @@ export default function Dashboard() {
 
   return (
     <div className="mt-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <button
-          className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-white shadow"
+          className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-white shadow w-full sm:w-auto"
           onClick={createCanvas}
         >
           + New Canvas
@@ -200,7 +195,7 @@ export default function Dashboard() {
       ) : canvases.length === 0 ? (
         <p className="text-slate-400">No canvases yet. Create one!</p>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {canvases.map((c) => (
             <div
               key={c.$id}
@@ -208,7 +203,7 @@ export default function Dashboard() {
               transform transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
             >
               {/* 🔹 Action Icons */}
-              <div className="absolute top-3 right-3 flex gap-2">
+              <div className="absolute top-3 right-3 flex gap-2 flex-wrap">
                 <button
                   onClick={() => router.push(`/canvas/${c.$id}`)}
                   className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
@@ -231,21 +226,24 @@ export default function Dashboard() {
                   <Trash2 size={16} className="text-red-400" />
                 </button>
 
-                {/* Publish + Unpublish shown together */}
-                <button
-                  onClick={() => publishSite(c.$id)}
-                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                  title="Publish"
-                >
-                  <Globe size={16} className="text-green-400" />
-                </button>
-                <button
-                  onClick={() => unpublishSite(c.$id)}
-                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                  title="Unpublish"
-                >
-                  <GlobeLock size={16} className="text-yellow-400" />
-                </button>
+                {/* ✅ Show only one publish/unpublish button */}
+                {c.published ? (
+                  <button
+                    onClick={() => unpublishSite(c.$id)}
+                    className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                    title="Unpublish"
+                  >
+                    <GlobeLock size={16} className="text-yellow-400" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => publishSite(c.$id)}
+                    className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
+                    title="Publish"
+                  >
+                    <Globe size={16} className="text-green-400" />
+                  </button>
+                )}
               </div>
 
               {/* 🔹 Card Content */}
@@ -277,7 +275,7 @@ export default function Dashboard() {
                   <a
                     href={c.publishedUrl}
                     target="_blank"
-                    className="text-cyan-400 hover:underline text-sm"
+                    className="text-cyan-400 hover:underline text-sm break-words"
                   >
                     🌍 View Live Site
                   </a>
