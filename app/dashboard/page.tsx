@@ -45,6 +45,16 @@ export default function Dashboard() {
     checkAuthAndLoad();
   }, [router]);
 
+  useEffect(() => {
+  const unsubscribe = databases.client.subscribe(
+    `databases.${process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID}.documents`,
+    (res: any) => {
+      fetchCanvases(me?.$id);
+    }
+  );
+    return () => unsubscribe();
+  }, [me]);
+
   const fetchCanvases = async (uid: string) => {
     try {
       setLoading(true);
