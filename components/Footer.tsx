@@ -1,14 +1,24 @@
-import { Github, Twitter, Globe } from "lucide-react";
+import { Github, Twitter, Globe, Youtube } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
     <footer className="border-t border-slate-800 bg-slate-900/80 backdrop-blur mt-20">
       <div className="container mx-auto py-10 px-6 md:px-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         {/* Brand */}
-        <div>
-          <h3 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
-            CanvasCraft
-          </h3>
+        <div className="flex flex-col items-center md:items-start">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/canvascraft-logo.png"
+              alt="CanvasCraft Logo"
+              width={48}
+              height={48}
+              className="rounded"
+            />
+            <h3 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
+              CanvasCraft
+            </h3>
+          </div>
           <p className="mt-3 text-slate-400 text-sm leading-relaxed">
             Build, collaborate, and publish sites in real time.  
             A next-gen builder made for creators and teams.
@@ -50,6 +60,13 @@ export default function Footer() {
               className="text-slate-400 hover:text-white transition"
             >
               <Globe size={20} />
+            </a>
+            <a
+              href="https://youtube.com/@codewitharhanofficial?si=bJKF4UpMXPK-ASUa"
+              target="_blank"
+              className="text-slate-400 hover:text-white transition"
+            >
+              <Youtube size={20} />
             </a>
           </div>
         </div>
