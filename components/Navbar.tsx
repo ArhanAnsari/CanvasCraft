@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/useAuth";
 import { Menu } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -19,11 +20,17 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur border-b border-slate-700/50">
       <div className="container mx-auto flex justify-between items-center py-4 px-6 md:px-10">
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent"
-        >
-          CanvasCraft
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/canvascraft-logo.png"
+            alt="CanvasCraft Logo"
+            width={36}
+            height={36}
+            className="rounded"
+          />
+          <span className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
+            CanvasCraft
+          </span>
         </Link>
 
         <div className="hidden md:flex gap-6 items-center text-sm">
@@ -75,7 +82,7 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden border-t border-slate-700 bg-slate-900/95">
           <div className="flex flex-col p-4 gap-3 text-slate-300">
-            <Link href="/#how" onClick={() => setOpen(false)}>How it works</Link>
+            <Link href="/#how-it-works" onClick={() => setOpen(false)}>How it works</Link>
             <Link href="/#features" onClick={() => setOpen(false)}>Features</Link>
             <Link href="/publish" onClick={() => setOpen(false)}>Published Sites</Link>
             {!user ? (
