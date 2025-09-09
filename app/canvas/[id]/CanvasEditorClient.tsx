@@ -17,8 +17,9 @@ import { v4 as uuidv4 } from "uuid";
 import { usePresence } from "@/hooks/usePresence";
 import { ID } from "appwrite";
 import CanvasSettings from "@/components/CanvasEditor/CanvasSettings";
+import { useSwipeable } from "react-swipeable";
 
-export default function CanvasEditorClient({ id }: { id: string }) {
+export default function CanvasEditorClient({ id }: { id: string }, i: number) {
   const [canvas, setCanvas] = useState<any | null>(null);
   const { people: presence, updateCursor } = usePresence(id);
 
@@ -267,6 +268,17 @@ export default function CanvasEditorClient({ id }: { id: string }) {
     return () => window.removeEventListener("keydown", handler);
   }, [selectedBlockId, canvas]);
 
+  const swipeHandlers = useSwipeable({
+    onSwipedUp: () => {
+      if (i < canvas.blocks.length - 1) setSelectedBlockId(canvas.blocks[i + 1].id);
+    },
+    onSwipedDown: () => {
+      if (i > 0) setSelectedBlockId(canvas.blocks[i - 1].id);
+    },
+    trackTouch: true,
+    trackMouse: false,
+  })
+
   const onDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over) return;
@@ -351,6 +363,7 @@ export default function CanvasEditorClient({ id }: { id: string }) {
                       key={block.id}
                       ref={(el) => (blockRefs.current[block.id] = el)}
                     >
+                    <div key={block.id} {...swipeHandlers}>
                       <BlockItem
                         block={block}
                         isSelected={selectedBlockId === block.id}
@@ -362,6 +375,7 @@ export default function CanvasEditorClient({ id }: { id: string }) {
                         onPaste={() => pasteBlock(block.id)}
                       />
                     </div>
+                  </div>
                   ))}
                 </div>
               </SortableContext>

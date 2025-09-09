@@ -20,15 +20,15 @@ export async function POST(req: Request) {
 
     if (existing.total > 0) {
       await databases.updateDocument(
-        process.env.APPWRITE_DATABASE_ID!,
-        process.env.APPWRITE_PRESENCE_COLLECTION_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_PRESENCE_COLLECTION_ID!,
         existing.documents[0].$id,
         { isOnline }
       );
     } else {
       await databases.createDocument(
-        process.env.APPWRITE_DATABASE_ID!,
-        process.env.APPWRITE_PRESENCE_COLLECTION_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_PRESENCE_COLLECTION_ID!,
         ID.unique(),
         { userId: session.user.$id, canvasId, isOnline }
       );

@@ -56,7 +56,7 @@ export default function CanvasSettings({
 
   return (
     <>
-      <Card className="w-full max-w-2xl mx-auto border border-slate-700 shadow-lg rounded-2xl bg-slate-900/50 backdrop-blur">
+      <Card className="w-full max-w-2xl mx-auto border border-slate-700 shadow-lg rounded-2xl bg-slate-900/50 backdrop-blur overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-slate-200">
             Canvas Settings
@@ -77,7 +77,7 @@ export default function CanvasSettings({
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Title input */}
           <Input
             value={title}

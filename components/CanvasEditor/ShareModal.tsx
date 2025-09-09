@@ -33,6 +33,7 @@ export default function ShareModal({ open, onClose, canvasId }: ShareModalProps)
       });
       setEmail("");
       setRole("viewer");
+      window.location.reload();
       onClose();
     } finally {
       setIsLoading(false);
@@ -41,7 +42,7 @@ export default function ShareModal({ open, onClose, canvasId }: ShareModalProps)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border border-slate-700">
+      <DialogContent className="bg-slate-900 border border-slate-700 max-w-md w-full sm:max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-slate-100">Invite Collaborator</DialogTitle>
         </DialogHeader>

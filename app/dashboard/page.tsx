@@ -7,6 +7,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/useAuth";
 import { Pencil, Trash2, Share2, Globe, GlobeLock } from "lucide-react";
+import { MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface Canvas {
   $id: string;
@@ -202,48 +209,24 @@ export default function Dashboard() {
               className="relative bg-slate-800/40 backdrop-blur-md border border-slate-700 p-5 rounded-2xl shadow-lg flex flex-col justify-between 
               transform transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
             >
-              {/* 🔹 Action Icons */}
-              <div className="absolute top-3 right-3 flex gap-2 flex-wrap">
-                <button
-                  onClick={() => router.push(`/canvas/${c.$id}`)}
-                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                  title="Edit"
-                >
-                  <Pencil size={16} className="text-slate-300" />
-                </button>
-                <button
-                  onClick={() => shareCanvas(c.$id)}
-                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                  title="Share"
-                >
-                  <Share2 size={16} className="text-slate-300" />
-                </button>
-                <button
-                  onClick={() => deleteCanvas(c.$id)}
-                  className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                  title="Delete"
-                >
-                  <Trash2 size={16} className="text-red-400" />
-                </button>
-
-                {/* ✅ Show only one publish/unpublish button */}
-                {c.published ? (
-                  <button
-                    onClick={() => unpublishSite(c.$id)}
-                    className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                    title="Unpublish"
-                  >
-                    <GlobeLock size={16} className="text-yellow-400" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => publishSite(c.$id)}
-                    className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600"
-                    title="Publish"
-                  >
-                    <Globe size={16} className="text-green-400" />
-                  </button>
-                )}
+              <div className="absolute top-3 right-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1.5 rounded-full bg-slate-700 hover:bg-slate-600">
+                      <MoreVertical size={16} className="text-slate-300" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border border-slate-700">
+                    <DropdownMenuItem onClick={() => router.push(`/canvas/${c.$id}`)}> <Pencil size={16} className="text-slate-300" /> Edit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => shareCanvas(c.$id)}> <Share2 size={16} className="text-slate-300" /> Share</DropdownMenuItem>
+                    {c.published ? (
+                      <DropdownMenuItem onClick={() => unpublishSite(c.$id)}> <GlobeLock size={16} className="text-yellow-400" /> Unpublish</DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={() => publishSite(c.$id)}> <Globe size={16} className="text-green-400" /> Publish</DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={() => deleteCanvas(c.$id)} className="text-red-400"> <Trash2 size={16} className="text-red-400" /> Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* 🔹 Card Content */}
@@ -256,11 +239,10 @@ export default function Dashboard() {
                 </Link>
 
                 <span
-                  className={`ml-3 inline-block px-3 py-1 text-xs rounded-full ${
-                    c.published
+                  className={`ml-3 inline-block px-3 py-1 text-xs rounded-full ${c.published
                       ? "bg-green-600/20 text-green-400"
                       : "bg-slate-600/20 text-slate-400"
-                  }`}
+                    }`}
                 >
                   {c.published ? "Published" : "Draft"}
                 </span>
