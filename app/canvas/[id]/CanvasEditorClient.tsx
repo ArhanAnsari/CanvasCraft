@@ -361,7 +361,9 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
                   {(canvas.blocks || []).map((block: any) => (
                     <div
                       key={block.id}
-                      ref={(el) => (blockRefs.current[block.id] = el)}
+                      ref={(el) => {
+                        blockRefs.current[block.id] = el;
+                      }}
                     >
                     <div key={block.id} {...swipeHandlers}>
                       <BlockItem
