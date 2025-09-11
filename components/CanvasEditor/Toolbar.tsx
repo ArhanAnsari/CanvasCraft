@@ -63,7 +63,7 @@ export function Toolbar({
         onClick={onAI}
         className="w-full mt-4 px-3 py-2 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-lg text-white font-medium shadow hover:opacity-90"
       >
-        Generate with AI <span className="ml-1 text-xs text-slate-200">(Coming soon)</span>
+        Generate with AI ✨
       </button>
     </div>
   );

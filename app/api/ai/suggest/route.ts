@@ -1,32 +1,37 @@
 // app/api/ai/suggest/route.ts
 import { NextResponse } from "next/server";
-import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+import { streamText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
-
-    const { text } = await generateText({
-      model: google("gemini-2.0-flash"),
-      prompt: `
-        Generate JSON blocks for a landing page editor.
-        Each block must be one of: "hero", "cta", "features", "gallery", "footer", or "text".
-        
-        Strictly return a valid JSON array in this format:
-        [
-          {"id": "uuid", "type": "hero", "props": {...}},
-          {"id": "uuid", "type": "cta", "props": {...}}
-        ]
-
-        Prompt: ${prompt}
-      `,
+    const google = createGoogleGenerativeAI({
+      apiKey: process.env.GEMINI_API_KEY!,
     });
 
-    const blocks = JSON.parse(text);
+    // ✅ Await the result
+    const { text } = await streamText({
+      model: google("gemini-2.5-flash"),
+      prompt: `Generate JSON blocks for a landing page editor.
+      Each block must be of type "hero", "cta", "features", "gallery", "footer", or "text".
+      Format only valid JSON array. Do NOT wrap in markdown.
+      Example: [{"id": "uuid", "type": "hero", "props": {...}}, ...]
+      Prompt: ${prompt}`,
+    });
+
+    // ✅ text is async-accessed
+    const raw = await text;
+    const clean = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const blocks = JSON.parse(clean);
+
     return NextResponse.json({ blocks });
   } catch (e: any) {
-    console.error("AI suggest error:", e);
+    console.error("AI suggest error", e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

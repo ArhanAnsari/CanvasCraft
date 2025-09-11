@@ -32,6 +32,8 @@ export default function Dashboard() {
   const [me, setMe] = useState<any>(null);
   const { user } = useAuth();
 
+  if (!user) return null;
+
   useEffect(() => {
     const checkAuthAndLoad = async () => {
       try {
@@ -189,11 +191,26 @@ export default function Dashboard() {
     }
   };
 
-  const shareCanvas = (id: string) => {
-    const url = `${window.location.origin}/canvas/${id}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Canvas link copied!");
-  };
+  const shareCanvas = async (canvasId: string, userId: string) => {
+  const doc = await databases.getDocument(
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+    canvasId
+  );
+
+  const updatedSharedWith = Array.isArray(doc.sharedWith) ? doc.sharedWith : [];
+  if (!updatedSharedWith.includes(userId)) {
+    updatedSharedWith.push(userId);
+  }
+
+  await databases.updateDocument(
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+    canvasId,
+    { sharedWith: updatedSharedWith }
+  );
+};
+
 
   return (
     <div className="mt-8">
@@ -228,7 +245,7 @@ export default function Dashboard() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-slate-800 border border-slate-700">
                     <DropdownMenuItem onClick={() => router.push(`/canvas/${c.$id}`)}> <Pencil size={16} className="text-slate-300" /> Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => shareCanvas(c.$id)}> <Share2 size={16} className="text-slate-300" /> Share</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => shareCanvas(c.$id, user.$id)}> <Share2 size={16} className="text-slate-300" /> Share</DropdownMenuItem>
                     {c.published ? (
                       <DropdownMenuItem onClick={() => unpublishSite(c.$id)}> <GlobeLock size={16} className="text-yellow-400" /> Unpublish</DropdownMenuItem>
                     ) : (

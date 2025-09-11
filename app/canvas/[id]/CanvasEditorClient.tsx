@@ -18,6 +18,7 @@ import { usePresence } from "@/hooks/usePresence";
 import { ID } from "appwrite";
 import CanvasSettings from "@/components/CanvasEditor/CanvasSettings";
 import { useSwipeable } from "react-swipeable";
+import AIPromptDialog from "@/components/CanvasEditor/AIPromptDialog";
 
 export default function CanvasEditorClient({ id }: { id: string }, i: number) {
   const [canvas, setCanvas] = useState<any | null>(null);
@@ -28,6 +29,28 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
 
   // Ref for auto-scroll to selected block
   const blockRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const [aiOpen, setAiOpen] = useState(false);
+
+  const aiSuggest = async (customPrompt?: string) => {
+    try {
+      const res = await fetch("/api/ai/suggest", {
+        method: "POST",
+        body: JSON.stringify({
+          prompt: customPrompt || canvas?.title || "Landing page",
+        }),
+      });
+      const json = await res.json();
+      if (Array.isArray(json.blocks)) {
+        const gen = json.blocks.map((blk: any) => ({ ...blk, id: uuidv4() }));
+        const blocks = [...(canvas?.blocks || []), ...gen];
+        setCanvas({ ...canvas, blocks });
+        await persist({ blocks });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Load canvas
   useEffect(() => {
@@ -291,23 +314,23 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
     }
   };
 
-  const aiSuggest = async () => {
-    try {
-      const res = await fetch("/api/ai/suggest", {
-        method: "POST",
-        body: JSON.stringify({ prompt: canvas?.title || "Landing page" }),
-      });
-      const json = await res.json();
-      if (Array.isArray(json.blocks)) {
-        const gen = json.blocks.map((blk: any) => ({ ...blk, id: uuidv4() }));
-        const blocks = [...(canvas?.blocks || []), ...gen];
-        setCanvas({ ...canvas, blocks });
-        await persist({ blocks });
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  // const aiSuggest = async () => {
+  //   try {
+  //     const res = await fetch("/api/ai/suggest", {
+  //       method: "POST",
+  //       body: JSON.stringify({ prompt: canvas?.title || "Landing page" }),
+  //     });
+  //     const json = await res.json();
+  //     if (Array.isArray(json.blocks)) {
+  //       const gen = json.blocks.map((blk: any) => ({ ...blk, id: uuidv4() }));
+  //       const blocks = [...(canvas?.blocks || []), ...gen];
+  //       setCanvas({ ...canvas, blocks });
+  //       await persist({ blocks });
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
   const publish = async () => {
     try {
@@ -336,8 +359,13 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
 
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-3">
-          <Toolbar onAdd={add} onAddImage={addImage} onAI={aiSuggest} />
+          <Toolbar onAdd={add} onAddImage={addImage} onAI={() => setAiOpen(true)} />
         </div>
+        <AIPromptDialog
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        onGenerate={(p) => aiSuggest(p)}
+      />
 
         <div className="col-span-12 md:col-span-6">
           <div className="glass p-4 rounded">
