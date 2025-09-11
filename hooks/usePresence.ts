@@ -22,43 +22,68 @@ export function usePresence(canvasId: string, user?: { $id: string; name?: strin
 
   const [people, setPeople] = useState<any[]>([]);
   const cursor = useRef({ x: 0, y: 0 });
+  const docIdRef = useRef<string | null>(null);
 
+  // 🔹 Heartbeat: create or update presence
   useEffect(() => {
     let stopped = false;
     const beat = async () => {
       if (stopped) return;
       try {
-        const now = Date.now();
-        await databases.createDocument(DB_ID, PRESENCE, ID.unique(), {
-          canvasId,
-          userId: me.id,
-          name: me.name,
-          color: me.color,
-          cursor: cursor.current,
-          ts: now,
-        });
-      } catch {
-        // ignore duplicate doc creation
+        const now = new Date().toISOString();
+        if (!docIdRef.current) {
+          const doc = await databases.createDocument(DB_ID, PRESENCE, ID.unique(), {
+            canvasId,
+            userId: me.id,
+            name: me.name,
+            color: me.color,
+            cursorX: cursor.current.x,
+            cursorY: cursor.current.y,
+            ts: now,
+          });
+          docIdRef.current = doc.$id;
+        } else {
+          await databases.updateDocument(DB_ID, PRESENCE, docIdRef.current, {
+            cursorX: cursor.current.x,
+            cursorY: cursor.current.y,
+            ts: now,
+          });
+        }
+      } catch (e) {
+        console.error("Presence heartbeat failed", e);
       }
     };
     beat();
     const i = setInterval(beat, HEARTBEAT_MS);
-    return () => { stopped = true; clearInterval(i); };
+    return () => {
+      stopped = true;
+      clearInterval(i);
+    };
   }, [canvasId, me]);
 
+  // 🔹 Poll active users
   useEffect(() => {
     let stopped = false;
     const poll = async () => {
       if (stopped) return;
       try {
-        const list = await databases.listDocuments(DB_ID, PRESENCE, [Query.equal("canvasId", canvasId)]);
+        const list = await databases.listDocuments(DB_ID, PRESENCE, [
+          Query.equal("canvasId", canvasId),
+        ]);
         const now = Date.now();
-        setPeople(list.documents.filter((d: any) => now - d.ts < STALE_AFTER_MS));
-      } catch {}
+        setPeople(
+          list.documents.filter((d: any) => now - new Date(d.ts).getTime() < STALE_AFTER_MS)
+        );
+      } catch (e) {
+        console.error("Presence poll failed", e);
+      }
     };
     poll();
     const i = setInterval(poll, 5000);
-    return () => { stopped = true; clearInterval(i); };
+    return () => {
+      stopped = true;
+      clearInterval(i);
+    };
   }, [canvasId]);
 
   const updateCursor = (pos: { x: number; y: number }) => {
