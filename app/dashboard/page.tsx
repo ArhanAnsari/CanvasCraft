@@ -14,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { Query } from "appwrite";
 
 interface Canvas {
   $id: string;
@@ -48,33 +49,47 @@ export default function Dashboard() {
   }, [router]);
 
   useEffect(() => {
-  const unsubscribe = databases.client.subscribe(
-    `databases.${process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID}.documents`,
-    (res: any) => {
-      fetchCanvases(me?.$id);
-    }
-  );
+    const unsubscribe = databases.client.subscribe(
+      `databases.${process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID}.documents`,
+      (res: any) => {
+        fetchCanvases(me?.$id);
+      }
+    );
     return () => unsubscribe();
   }, [me]);
 
   const fetchCanvases = async (uid: string) => {
     try {
       setLoading(true);
+
       const res = await databases.listDocuments(
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-        process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!
+        process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+        [
+          // fetch canvases where the user is owner OR in sharedWith
+          Query.or([
+            Query.equal("userId", uid),
+            Query.search("sharedWith", uid), // works for text-based array
+          ]),
+        ]
       );
 
       const docs = res.documents || [];
-      const mapped = (docs as any[])
-        .filter((d) => d.userId === uid || (d.sharedWith || []).includes(uid))
-        .map((d) => ({
+
+      const mapped = (docs as any[]).map((d) => {
+        // handle both cases: string[] or relationship[]
+        const sharedWith =
+          Array.isArray(d.sharedWith) && d.sharedWith.length > 0
+            ? d.sharedWith.map((s: any) => (typeof s === "string" ? s : s.$id))
+            : [];
+
+        return {
           $id: d.$id,
           title: d.title ?? `Untitled ${d.$createdAt ?? Date.now()}`,
           published: Boolean(d.published),
           publishedUrl: d.publishedUrl || undefined,
           userId: d.userId,
-          sharedWith: d.sharedWith || [],
+          sharedWith,
           blocks: (d.blocks || [])
             .map((b: string) => {
               try {
@@ -84,7 +99,9 @@ export default function Dashboard() {
               }
             })
             .filter(Boolean),
-        })) as Canvas[];
+        };
+      }) as Canvas[];
+
       setCanvases(mapped);
     } catch (e) {
       console.error("Failed to fetch canvases:", e);
@@ -93,6 +110,7 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
 
   const createCanvas = async () => {
     try {
@@ -192,24 +210,24 @@ export default function Dashboard() {
   };
 
   const shareCanvas = async (canvasId: string, userId: string) => {
-  const doc = await databases.getDocument(
-    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-    process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
-    canvasId
-  );
+    const doc = await databases.getDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+      canvasId
+    );
 
-  const updatedSharedWith = Array.isArray(doc.sharedWith) ? doc.sharedWith : [];
-  if (!updatedSharedWith.includes(userId)) {
-    updatedSharedWith.push(userId);
-  }
+    const updatedSharedWith = Array.isArray(doc.sharedWith) ? doc.sharedWith : [];
+    if (!updatedSharedWith.includes(userId)) {
+      updatedSharedWith.push(userId);
+    }
 
-  await databases.updateDocument(
-    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-    process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
-    canvasId,
-    { sharedWith: updatedSharedWith }
-  );
-};
+    await databases.updateDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID!,
+      canvasId,
+      { sharedWith: updatedSharedWith }
+    );
+  };
 
 
   return (
@@ -267,8 +285,8 @@ export default function Dashboard() {
 
                 <span
                   className={`ml-3 inline-block px-3 py-1 text-xs rounded-full ${c.published
-                      ? "bg-green-600/20 text-green-400"
-                      : "bg-slate-600/20 text-slate-400"
+                    ? "bg-green-600/20 text-green-400"
+                    : "bg-slate-600/20 text-slate-400"
                     }`}
                 >
                   {c.published ? "Published" : "Draft"}
