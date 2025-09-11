@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Client, Databases, ID, Query } from "appwrite";
 import { colorFromId } from "@/lib/colors";
+import { useAuth } from "@/lib/useAuth";
 
 const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
 const PROJECT = process.env.NEXT_PUBLIC_APPWRITE_PROJECT!;
@@ -14,11 +15,17 @@ const STALE_AFTER_MS = 35_000;
 const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT);
 const databases = new Databases(client);
 
-export function usePresence(canvasId: string, user?: { $id: string; name?: string }) {
+export function usePresence(canvasId: string) {
+  const { user } = useAuth();
+  if (!user) throw new Error("usePresence requires auth");
+
   const me = useMemo(() => {
-    const u = user ?? { $id: `anon_${crypto.randomUUID()}`, name: "Guest" };
-    return { id: u.$id, name: u.name || "Guest", color: colorFromId(u.$id) };
-  }, [user]);
+  return {
+    id: user.$id,
+    name: user.name || "Guest",
+    color: colorFromId(user.$id),
+  };
+}, [user]);
 
   const [people, setPeople] = useState<any[]>([]);
   const cursor = useRef({ x: 0, y: 0 });
