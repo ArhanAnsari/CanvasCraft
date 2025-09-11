@@ -24,8 +24,8 @@ export default function Navbar() {
           <Image
             src="/canvascraft-logo.png"
             alt="CanvasCraft Logo"
-            width={44}
-            height={44}
+            width={56}
+            height={56}
             className="rounded"
           />
           <span className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
