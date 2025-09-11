@@ -21,7 +21,7 @@ type ShareModalProps = {
 
 export default function ShareModal({ open, onClose, canvasId, ownerId }: ShareModalProps) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("viewer");
+  const [role, setRole] = useState("editor");
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
 

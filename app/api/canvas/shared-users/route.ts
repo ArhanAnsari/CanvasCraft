@@ -13,6 +13,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     return NextResponse.json({ users: res.documents });
   } catch (err: any) {
+    console.error(err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

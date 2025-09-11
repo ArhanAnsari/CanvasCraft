@@ -3,7 +3,7 @@ import { databases, ID } from "@/lib/appwrite";
 
 export async function POST(req: Request) {
   try {
-    const { id, userId, role = "viewer" } = await req.json();
+    const { id, userId, role = "editor" } = await req.json();
     if (!id || !userId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     await databases.createDocument(db, presenceColl, ID.unique(), {
       canvasId: id,
       userId,
-      ownerId: doc.ownerId,
+      ownerId: Array.isArray(doc.ownerId) ? doc.ownerId : [doc.ownerId], // ✅ always array
       role,
       status: "invited",
       lastActiveAt: new Date().toISOString(),
@@ -31,6 +31,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(updated);
   } catch (e: any) {
+    console.error(e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
