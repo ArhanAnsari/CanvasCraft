@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ShareModalProps = {
   open: boolean;
@@ -19,7 +25,12 @@ type ShareModalProps = {
   ownerId: string;
 };
 
-export default function ShareModal({ open, onClose, canvasId, ownerId }: ShareModalProps) {
+export default function ShareModal({
+  open,
+  onClose,
+  canvasId,
+  ownerId,
+}: ShareModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("editor");
   const [isLoading, setIsLoading] = useState(false);
@@ -70,34 +81,49 @@ export default function ShareModal({ open, onClose, canvasId, ownerId }: ShareMo
         {/* Invite */}
         <div className="space-y-4">
           <Input
-            placeholder="Enter user ID..."
+            placeholder="Enter email ID..."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="bg-slate-800 border-slate-700 text-slate-100"
           />
 
-          <Select value={role} onValueChange={setRole}>
-            <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100">
-              <SelectValue placeholder="Select role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="viewer">Viewer</SelectItem>
-              <SelectItem value="editor">Editor</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100 w-full sm:w-40">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                <SelectItem value="viewer">Viewer</SelectItem>
+                <SelectItem value="editor">Editor</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Button onClick={handleInvite} disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-500 w-full">
-            {isLoading ? "Inviting..." : "Invite"}
-          </Button>
+            <Button
+              onClick={handleInvite}
+              disabled={isLoading}
+              className="bg-indigo-600 hover:bg-indigo-500 w-full sm:w-auto"
+            >
+              {isLoading ? "Inviting..." : "Invite"}
+            </Button>
+          </div>
         </div>
 
         {/* List collaborators */}
         <div className="mt-6 space-y-3">
           {users.map((u) => (
-            <div key={u.$id} className="flex items-center justify-between p-2 bg-slate-800 rounded-lg">
-              <span className="text-slate-100">{u.userId} ({u.role})</span>
+            <div
+              key={u.$id}
+              className="flex items-center justify-between p-2 bg-slate-800 rounded-lg"
+            >
+              <span className="text-slate-100">
+                {u.userId} ({u.role})
+              </span>
               {ownerId && (
-                <Button size="sm" variant="destructive" onClick={() => handleRemove(u.userId)}>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleRemove(u.userId)}
+                >
                   Remove
                 </Button>
               )}
@@ -106,7 +132,11 @@ export default function ShareModal({ open, onClose, canvasId, ownerId }: ShareMo
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} className="border-slate-600 w-full">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="border-slate-600 w-full"
+          >
             Close
           </Button>
         </DialogFooter>
