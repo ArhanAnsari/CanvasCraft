@@ -120,6 +120,51 @@ export default function ReadOnlyBlockRenderer({ block }: { block: Block }) {
       />
     );
   }
+  
+ if (block.type === "video") {
+  return (
+    <div className="rounded overflow-hidden shadow bg-black">
+      <iframe
+        src={block.props.url}
+        allow={block.props.autoplay ? "autoplay" : ""}
+        controls={block.props.controls ? 1 : 0}
+        className="w-full h-64"
+      />
+    </div>
+  );
+}
+
+if (block.type === "form") {
+  const p = block.props;
+  return (
+    <form className="p-6 bg-slate-900 rounded space-y-4 max-w-lg mx-auto">
+      <h2 className="text-xl font-bold text-white">{p.title}</h2>
+      {(p.fields || []).map((f: any, i: number) => (
+        <div key={i} className="flex flex-col">
+          <label className="text-slate-300 mb-1">{f.label}</label>
+          {f.type === "textarea" ? (
+            <textarea
+              placeholder={f.placeholder}
+              className="bg-slate-800 px-3 py-2 rounded text-white"
+            />
+          ) : (
+            <input
+              type={f.type}
+              placeholder={f.placeholder}
+              className="bg-slate-800 px-3 py-2 rounded text-white"
+            />
+          )}
+        </div>
+      ))}
+      <button
+        type="submit"
+        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+      >
+        {p.buttonLabel}
+      </button>
+    </form>
+  );
+}
 
   if (block.type === "button") {
     return (
