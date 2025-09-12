@@ -67,7 +67,7 @@ export const Templates = {
   }),
 
   // 🎬 New Video block
-  video: (url = 'https://www.youtube.com/embed/dQw4w9WgXcQ'): Block => ({
+  video: (url = 'https://www.youtube.com/embed/vZAvQd_ibC8'): Block => ({
     id: crypto.randomUUID(),
     type: 'video',
     props: { url, autoplay: false, controls: true, bg: '', fontSize: 'base' },
