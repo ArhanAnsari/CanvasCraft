@@ -25,6 +25,13 @@ type ShareModalProps = {
   ownerId: string;
 };
 
+type Collaborator = {
+  $id: string;
+  email: string;
+  role: string;
+  userId: string;
+};
+
 export default function ShareModal({
   open,
   onClose,
@@ -34,12 +41,21 @@ export default function ShareModal({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("editor");
   const [isLoading, setIsLoading] = useState(false);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<Collaborator[]>([]);
 
   async function fetchUsers() {
     const res = await fetch(`/api/canvas/${canvasId}/shared-users`);
     const data = await res.json();
-    setUsers(data.users || []);
+
+    // Deduplicate users by email
+    const uniqueUsers = new Map<string, Collaborator>();
+    (data.users || []).forEach((u: Collaborator) => {
+      if (!uniqueUsers.has(u.email)) {
+        uniqueUsers.set(u.email, u);
+      }
+    });
+
+    setUsers(Array.from(uniqueUsers.values()));
   }
 
   useEffect(() => {
@@ -52,7 +68,7 @@ export default function ShareModal({
       await fetch(`/api/canvas/share`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: canvasId, userId: email, role }),
+        body: JSON.stringify({ id: canvasId, email, role }),
       });
       setEmail("");
       setRole("viewer");
@@ -62,11 +78,11 @@ export default function ShareModal({
     }
   }
 
-  async function handleRemove(uid: string) {
+  async function handleRemove(userEmail: string) {
     await fetch(`/api/canvas/${canvasId}/remove-user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid }),
+      body: JSON.stringify({ email: userEmail }),
     });
     fetchUsers();
   }
@@ -116,13 +132,13 @@ export default function ShareModal({
               className="flex items-center justify-between p-2 bg-slate-800 rounded-lg"
             >
               <span className="text-slate-100">
-                {u.userId} ({u.role})
+                {u.email} ({u.role})
               </span>
               {ownerId && (
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => handleRemove(u.userId)}
+                  onClick={() => handleRemove(u.email)}
                 >
                   Remove
                 </Button>
