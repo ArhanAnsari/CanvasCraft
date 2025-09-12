@@ -153,8 +153,9 @@ export default function ShareModal({
               key={u.$id}
               className="flex items-center justify-between p-2 bg-slate-800 rounded-lg"
             >
+              {/* 👇 Show userId instead of email */}
               <span className="text-slate-100">
-                {u.email} ({u.role})
+                {u.userId} ({u.role})
               </span>
               {ownerId && (
                 <Button
