@@ -22,7 +22,7 @@ type ShareModalProps = {
   open: boolean;
   onClose: () => void;
   canvasId: string;
-  ownerId: string;
+  ownerId: string; // logged-in owner's userId
 };
 
 type Collaborator = {
@@ -42,12 +42,12 @@ export default function ShareModal({
   const [role, setRole] = useState("editor");
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<Collaborator[]>([]);
+  const [owner, setOwner] = useState<Collaborator | null>(null);
 
   async function fetchUsers() {
     const res = await fetch(`/api/canvas/${canvasId}/shared-users`);
     const data = await res.json();
 
-    // Deduplicate users by email
     const uniqueUsers = new Map<string, Collaborator>();
     (data.users || []).forEach((u: Collaborator) => {
       if (!uniqueUsers.has(u.email)) {
@@ -55,7 +55,14 @@ export default function ShareModal({
       }
     });
 
-    setUsers(Array.from(uniqueUsers.values()));
+    const allUsers = Array.from(uniqueUsers.values());
+
+    // separate owner from other collaborators
+    const ownerUser = allUsers.find((u) => u.userId === ownerId) || null;
+    const otherUsers = allUsers.filter((u) => u.userId !== ownerId);
+
+    setOwner(ownerUser);
+    setUsers(otherUsers);
   }
 
   useEffect(() => {
@@ -78,11 +85,11 @@ export default function ShareModal({
     }
   }
 
-  async function handleRemove(userEmail: string) {
+  async function handleRemove(uid: string) {
     await fetch(`/api/canvas/${canvasId}/remove-user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: userEmail }),
+      body: JSON.stringify({ uid }), // API expects uid
     });
     fetchUsers();
   }
@@ -124,6 +131,21 @@ export default function ShareModal({
           </div>
         </div>
 
+        {/* Show Owner */}
+        {owner && (
+          <div className="mt-6">
+            <h4 className="text-slate-400 text-sm mb-2">Owner</h4>
+            <div className="flex items-center justify-between p-2 bg-slate-800 rounded-lg">
+              <span className="text-slate-100">
+                {owner.email}{" "}
+                <span className="ml-2 px-2 py-0.5 text-xs bg-indigo-600 text-white rounded-full">
+                  Owner
+                </span>
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* List collaborators */}
         <div className="mt-6 space-y-3">
           {users.map((u) => (
@@ -138,7 +160,7 @@ export default function ShareModal({
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => handleRemove(u.email)}
+                  onClick={() => handleRemove(u.userId)}
                 >
                   Remove
                 </Button>
