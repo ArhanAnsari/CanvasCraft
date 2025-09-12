@@ -52,7 +52,19 @@ export default function Dashboard() {
     const unsubscribe = databases.client.subscribe(
       `databases.${process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.NEXT_PUBLIC_APPWRITE_CANVASES_COLLECTION_ID}.documents`,
       (res: any) => {
-        fetchCanvases(me?.$id);
+        if (!me?.$id) return;
+
+        if (res.events.includes("databases.*.collections.*.documents.*.create")) {
+          setCanvases((prev) => [...prev, res.payload]);
+        }
+        if (res.events.includes("databases.*.collections.*.documents.*.delete")) {
+          setCanvases((prev) => prev.filter((c) => c.$id !== res.payload.$id));
+        }
+        if (res.events.includes("databases.*.collections.*.documents.*.update")) {
+          setCanvases((prev) =>
+            prev.map((c) => (c.$id === res.payload.$id ? res.payload : c))
+          );
+        }
       }
     );
     return () => unsubscribe();
@@ -69,7 +81,7 @@ export default function Dashboard() {
           // fetch canvases where the user is owner OR in sharedWith
           Query.or([
             Query.equal("userId", uid),
-            Query.search("sharedWith", uid), // works for text-based array
+            Query.contains("sharedWith", uid), // works for text-based array
           ]),
         ]
       );

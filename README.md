@@ -127,7 +127,7 @@ Appwrite Sites is also best to deployment.
 
 [ ] Dark mode toggle 🌙
 
-[ ] More block types (Gallery, Video, Forms, etc.)
+[x] More block types (Gallery, Video, Forms, etc.)
 
 [ ] Team workspaces
 

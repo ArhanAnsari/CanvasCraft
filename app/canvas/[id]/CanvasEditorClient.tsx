@@ -361,11 +361,17 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
         <div className="col-span-12 md:col-span-3">
           <Toolbar onAdd={add} onAddImage={addImage} onAI={() => setAiOpen(true)} />
         </div>
+
         <AIPromptDialog
-        open={aiOpen}
-        onClose={() => setAiOpen(false)}
-        onGenerate={(p) => aiSuggest(p)}
-      />
+          open={aiOpen}
+          onClose={() => setAiOpen(false)}
+          onInsert={async (genBlocks) => {
+            const blocks = [...(canvas?.blocks || []), ...genBlocks];
+            setCanvas({ ...canvas, blocks });
+            await persist({ blocks });
+          }}
+        />
+
 
         <div className="col-span-12 md:col-span-6">
           <div className="glass p-4 rounded">
@@ -393,19 +399,19 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
                         blockRefs.current[block.id] = el;
                       }}
                     >
-                    <div key={block.id} {...swipeHandlers}>
-                      <BlockItem
-                        block={block}
-                        isSelected={selectedBlockId === block.id}
-                        onSelect={() => setSelectedBlockId(block.id)}
-                        onUpdate={onUpdateBlock}
-                        onDelete={onDeleteBlock}
-                        onDuplicate={() => duplicateBlock(block.id)}
-                        onCopy={() => copyBlock(block.id)}
-                        onPaste={() => pasteBlock(block.id)}
-                      />
+                      <div key={block.id} {...swipeHandlers}>
+                        <BlockItem
+                          block={block}
+                          isSelected={selectedBlockId === block.id}
+                          onSelect={() => setSelectedBlockId(block.id)}
+                          onUpdate={onUpdateBlock}
+                          onDelete={onDeleteBlock}
+                          onDuplicate={() => duplicateBlock(block.id)}
+                          onCopy={() => copyBlock(block.id)}
+                          onPaste={() => pasteBlock(block.id)}
+                        />
+                      </div>
                     </div>
-                  </div>
                   ))}
                 </div>
               </SortableContext>

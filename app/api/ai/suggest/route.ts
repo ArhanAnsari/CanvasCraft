@@ -1,6 +1,5 @@
-// app/api/ai/suggest/route.ts
 import { NextResponse } from "next/server";
-import { streamText } from "ai";
+import { generateText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export async function POST(req: Request) {
@@ -10,23 +9,17 @@ export async function POST(req: Request) {
       apiKey: process.env.GEMINI_API_KEY!,
     });
 
-    // ✅ Await the result
-    const { text } = await streamText({
+    const { text } = await generateText({
       model: google("gemini-2.5-flash"),
       prompt: `Generate JSON blocks for a landing page editor.
-      Each block must be of type "hero", "cta", "features", "gallery", "footer", or "text".
-      Format only valid JSON array. Do NOT wrap in markdown.
-      Example: [{"id": "uuid", "type": "hero", "props": {...}}, ...]
-      Prompt: ${prompt}`,
+Each block must be of type "hero", "cta", "features", "gallery", "video", "form", "footer", "text", or "image".
+Ensure each block has useful example props (like real headlines, button text, image urls, gallery items, video embeds, form fields).
+Only return a valid JSON array. Do NOT wrap in markdown.
+Example: [{"id":"uuid","type":"hero","props":{"headline":"Welcome to My App","tagline":"Fast. Modern. Reliable."}}]
+Prompt: ${prompt}`,
     });
 
-    // ✅ text is async-accessed
-    const raw = await text;
-    const clean = raw
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
+    const clean = text.trim();
     const blocks = JSON.parse(clean);
 
     return NextResponse.json({ blocks });
