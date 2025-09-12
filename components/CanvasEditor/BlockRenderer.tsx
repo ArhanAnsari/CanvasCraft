@@ -135,6 +135,103 @@ export default function BlockRenderer({ block, onUpdate }: { block: Block; onUpd
       </div>
     );
   }
+  
+  if (block.type === "video") {
+  return (
+    <div style={appliedStyle}>
+      <StyleControls />
+      <input
+        className="w-full bg-slate-800 px-2 py-1 rounded text-slate-100"
+        value={block.props.url}
+        onChange={(e) => updateProps({ url: e.target.value })}
+        placeholder="Video embed URL"
+      />
+      <div className="mt-2 flex gap-3">
+        <label className="flex items-center gap-2 text-slate-300">
+          <input
+            type="checkbox"
+            checked={block.props.autoplay}
+            onChange={(e) => updateProps({ autoplay: e.target.checked })}
+          />
+          Autoplay
+        </label>
+        <label className="flex items-center gap-2 text-slate-300">
+          <input
+            type="checkbox"
+            checked={block.props.controls}
+            onChange={(e) => updateProps({ controls: e.target.checked })}
+          />
+          Show Controls
+        </label>
+      </div>
+    </div>
+  );
+}
+
+if (block.type === "form") {
+  const fields: any[] = block.props.fields || [];
+  const updateField = (idx: number, patch: any) => {
+    const next = fields.map((f, i) => (i === idx ? { ...f, ...patch } : f));
+    updateProps({ fields: next });
+  };
+  const addField = () =>
+    updateProps({
+      fields: [...fields, { label: "New Field", type: "text", placeholder: "" }],
+    });
+  const removeField = (idx: number) =>
+    updateProps({ fields: fields.filter((_, i) => i !== idx) });
+
+  return (
+    <div style={appliedStyle}>
+      <StyleControls />
+      <input
+        className="w-full bg-transparent border-b border-slate-700 pb-2 text-lg font-semibold text-white mb-3"
+        value={block.props.title}
+        onChange={(e) => updateProps({ title: e.target.value })}
+        placeholder="Form title"
+      />
+      <div className="space-y-3">
+        {fields.map((f: any, idx: number) => (
+          <div key={idx} className="flex gap-2 items-start">
+            <input
+              className="bg-slate-800 px-2 py-1 rounded flex-1"
+              value={f.label}
+              onChange={(e) => updateField(idx, { label: e.target.value })}
+              placeholder="Field label"
+            />
+            <select
+              className="bg-slate-800 px-2 py-1 rounded"
+              value={f.type}
+              onChange={(e) => updateField(idx, { type: e.target.value })}
+            >
+              <option value="text">Text</option>
+              <option value="email">Email</option>
+              <option value="textarea">Textarea</option>
+            </select>
+            <button
+              onClick={() => removeField(idx)}
+              className="px-2 py-1 bg-red-600 rounded text-white"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={addField}
+          className="px-3 py-1 bg-indigo-600 rounded text-white text-sm"
+        >
+          Add field
+        </button>
+      </div>
+      <input
+        className="mt-4 bg-slate-800 px-2 py-1 rounded w-full"
+        value={block.props.buttonLabel}
+        onChange={(e) => updateProps({ buttonLabel: e.target.value })}
+        placeholder="Submit button label"
+      />
+    </div>
+  );
+}
 
   if (block.type === "features") {
     const items: any[] = block.props.items || [];

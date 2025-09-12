@@ -8,9 +8,8 @@ export type Block = {
     | 'cta'
     | 'footer'
     | 'text'
-    | 'image'
-    | 'button'
-    | 'aiResponse'
+    | 'video'
+    | 'form'
   props: any
 }
 
@@ -23,14 +22,7 @@ export const Templates = {
   ): Block => ({
     id: crypto.randomUUID(),
     type: 'hero',
-    props: {
-      heading,
-      subheading,
-      buttonLabel,
-      buttonHref,
-      bg: '',
-      fontSize: 'base',
-    },
+    props: { heading, subheading, buttonLabel, buttonHref, bg: '', fontSize: 'base' },
   }),
 
   features: (
@@ -74,21 +66,27 @@ export const Templates = {
     props: { text, bg: '', fontSize: 'base' },
   }),
 
-  image: (src = '', alt = 'Image'): Block => ({
+  // 🎬 New Video block
+  video: (url = 'https://www.youtube.com/embed/vZAvQd_ibC8'): Block => ({
     id: crypto.randomUUID(),
-    type: 'image',
-    props: { src, alt, width: '100%', height: 'auto', rounded: false },
+    type: 'video',
+    props: { url, autoplay: false, controls: true, bg: '', fontSize: 'base' },
   }),
 
-  button: (label = 'Click me', href = '#'): Block => ({
+  // 📩 New Form block
+  form: (): Block => ({
     id: crypto.randomUUID(),
-    type: 'button',
-    props: { label, href, variant: 'primary', size: 'md' },
-  }),
-
-  aiResponse: (prompt = '', response = ''): Block => ({
-    id: crypto.randomUUID(),
-    type: 'aiResponse',
-    props: { prompt, response, createdAt: new Date().toISOString() },
+    type: 'form',
+    props: {
+      title: 'Contact Us',
+      fields: [
+        { label: 'Name', type: 'text', placeholder: 'Enter your name' },
+        { label: 'Email', type: 'email', placeholder: 'Enter your email' },
+        { label: 'Message', type: 'textarea', placeholder: 'Your message...' },
+      ],
+      buttonLabel: 'Submit',
+      bg: '',
+      fontSize: 'base',
+    },
   }),
 }
