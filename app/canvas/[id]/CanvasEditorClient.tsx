@@ -20,7 +20,7 @@ import CanvasSettings from "@/components/CanvasEditor/CanvasSettings";
 import { useSwipeable } from "react-swipeable";
 import AIPromptDialog from "@/components/CanvasEditor/AIPromptDialog";
 
-export default function CanvasEditorClient({ id }: { id: string }, i: number) {
+export default function CanvasEditorClient({ id }: { id: string }) {
   const [canvas, setCanvas] = useState<any | null>(null);
   const { people: presence, updateCursor } = usePresence(id);
 
@@ -291,16 +291,29 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
     return () => window.removeEventListener("keydown", handler);
   }, [selectedBlockId, canvas]);
 
+  // Swipe handlers attached to canvas area (moves selected block up/down)
   const swipeHandlers = useSwipeable({
     onSwipedUp: () => {
-      if (i < canvas.blocks.length - 1) setSelectedBlockId(canvas.blocks[i + 1].id);
+      if (!canvas?.blocks || canvas.blocks.length === 0) return;
+      if (!selectedBlockId) {
+        setSelectedBlockId(canvas.blocks[0].id);
+        return;
+      }
+      const idx = canvas.blocks.findIndex((b: any) => b.id === selectedBlockId);
+      if (idx < canvas.blocks.length - 1) setSelectedBlockId(canvas.blocks[idx + 1].id);
     },
     onSwipedDown: () => {
-      if (i > 0) setSelectedBlockId(canvas.blocks[i - 1].id);
+      if (!canvas?.blocks || canvas.blocks.length === 0) return;
+      if (!selectedBlockId) {
+        setSelectedBlockId(canvas.blocks[0].id);
+        return;
+      }
+      const idx = canvas.blocks.findIndex((b: any) => b.id === selectedBlockId);
+      if (idx > 0) setSelectedBlockId(canvas.blocks[idx - 1].id);
     },
     trackTouch: true,
     trackMouse: false,
-  })
+  });
 
   const onDragEnd = (event: any) => {
     const { active, over } = event;
@@ -313,24 +326,6 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
       persist({ blocks: newBlocks });
     }
   };
-
-  // const aiSuggest = async () => {
-  //   try {
-  //     const res = await fetch("/api/ai/suggest", {
-  //       method: "POST",
-  //       body: JSON.stringify({ prompt: canvas?.title || "Landing page" }),
-  //     });
-  //     const json = await res.json();
-  //     if (Array.isArray(json.blocks)) {
-  //       const gen = json.blocks.map((blk: any) => ({ ...blk, id: uuidv4() }));
-  //       const blocks = [...(canvas?.blocks || []), ...gen];
-  //       setCanvas({ ...canvas, blocks });
-  //       await persist({ blocks });
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
 
   const publish = async () => {
     try {
@@ -372,7 +367,6 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
           }}
         />
 
-
         <div className="col-span-12 md:col-span-6">
           <div className="glass p-4 rounded">
             {selectedBlockId && (
@@ -391,7 +385,8 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
 
             <DndContext onDragEnd={onDragEnd} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]}>
               <SortableContext items={canvas.blocks?.map((b: any) => b.id) || []} strategy={verticalListSortingStrategy}>
-                <div className="canvas-area">
+                {/* attach swipe handlers to the canvas area wrapper */}
+                <div className="canvas-area" {...swipeHandlers}>
                   {(canvas.blocks || []).map((block: any) => (
                     <div
                       key={block.id}
@@ -399,18 +394,16 @@ export default function CanvasEditorClient({ id }: { id: string }, i: number) {
                         blockRefs.current[block.id] = el;
                       }}
                     >
-                      <div key={block.id} {...swipeHandlers}>
-                        <BlockItem
-                          block={block}
-                          isSelected={selectedBlockId === block.id}
-                          onSelect={() => setSelectedBlockId(block.id)}
-                          onUpdate={onUpdateBlock}
-                          onDelete={onDeleteBlock}
-                          onDuplicate={() => duplicateBlock(block.id)}
-                          onCopy={() => copyBlock(block.id)}
-                          onPaste={() => pasteBlock(block.id)}
-                        />
-                      </div>
+                      <BlockItem
+                        block={block}
+                        isSelected={selectedBlockId === block.id}
+                        onSelect={() => setSelectedBlockId(block.id)}
+                        onUpdate={onUpdateBlock}
+                        onDelete={onDeleteBlock}
+                        onDuplicate={() => duplicateBlock(block.id)}
+                        onCopy={() => copyBlock(block.id)}
+                        onPaste={() => pasteBlock(block.id)}
+                      />
                     </div>
                   ))}
                 </div>
