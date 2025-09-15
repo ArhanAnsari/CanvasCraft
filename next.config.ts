@@ -17,6 +17,70 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cloud.appwrite.io",
       },
+
+       // Placeholder Providers
+      { 
+         protocol: "https", 
+         hostname: "picsum.photos" 
+      },
+
+       // Free Stock Image Platforms
+      { 
+         protocol: "https", 
+         hostname: "images.unsplash.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "unsplash.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "images.pexels.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "pexels.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "cdn.pixabay.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "pixabay.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "rawpixel.com" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "burst.shopifycdn.com" 
+      }, // Burst by Shopify
+
+       // Wikimedia / Public Domain
+      { 
+         protocol: "https", 
+         hostname: "commons.wikimedia.org" 
+      },
+      { 
+         protocol: "https", 
+         hostname: "upload.wikimedia.org" 
+      },
+
+      // General media domains (optional if you want to cover wide usage)
+      { 
+         protocol: "https", 
+         hostname: "media.tenor.com" 
+      }, // GIFs
+      { 
+         protocol: "https", 
+         hostname: "i.giphy.com" 
+      },     // GIFs
+      { 
+         protocol: "https", 
+         hostname: "giphy.com" 
+      },
     ],
   },
   // Enable React strict mode
