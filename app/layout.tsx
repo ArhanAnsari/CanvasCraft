@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/lib/useAuth";
 import { Toaster } from "sonner";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "CanvasCraft – AI-Powered Block-Based Website Builder",
