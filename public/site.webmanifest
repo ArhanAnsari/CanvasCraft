@@ -1,0 +1,30 @@
+{
+  "name": "CanvasCraft – AI-Powered Block-Based Website Builder",
+  "short_name": "CanvasCraft",
+  "description": "CanvasCraft is an AI-powered, block-based website builder that helps you generate, edit, and manage responsive websites with ease.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/canvascraft-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/canvascraft-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
